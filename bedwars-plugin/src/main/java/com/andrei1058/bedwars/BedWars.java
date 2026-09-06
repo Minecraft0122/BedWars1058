@@ -632,7 +632,13 @@ public class BedWars extends JavaPlugin {
         return bungeeNodeRole;
     }
 
-    /** Role distributions override this hook to prevent an accidental swap. */
+    /**
+     * Compatibility hook retained for integrations compiled against 6.1.0.
+     * The supported distribution is a single JAR; node-role remains configurable.
+     *
+     * @deprecated role-specific distribution modules are no longer supported
+     */
+    @Deprecated
     public BungeeNodeRole getRequiredBungeeNodeRole() {
         return null;
     }

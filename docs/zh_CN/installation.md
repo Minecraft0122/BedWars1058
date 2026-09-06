@@ -11,14 +11,14 @@ Paper 26.2 会把自定义世界运行数据放入主 `level` 目录下的 `dime
 
 ## 获取自动发布版本
 
-默认分支的每次提交都会先执行完整 Maven 验证；只有构建和测试全部成功，才会自动创建 [GitHub Release](https://github.com/Minecraft0122/SimpMC-BedWars/releases)，并附带可直接安装的 Lobby/Arena 两个 JAR 与用于校验下载完整性的 `SHA256SUMS.txt`。
+默认分支的每次提交都会先执行完整 Maven 验证；只有构建和测试全部成功，才会自动创建 [GitHub Release](https://github.com/Minecraft0122/SimpMC-BedWars/releases)，并附带可直接安装的单个 JAR 与用于校验下载完整性的 `SHA256SUMS.txt`。
 
 Release 标签格式为 `v版本号-提交前八位`。同一版本号发生纯文档或构建流程更新时仍会创建独立 Release，不会覆盖旧提交的产物；重新运行同一次工作流则不会重复发布。
 
 ## 首次安装
 
-1. 从项目构建产物中取得与节点角色匹配的 `SimpMC-BedWars-Lobby-版本.jar` 或 `SimpMC-BedWars-Arena-版本.jar`。
-2. 将对应 JAR 放入服务端 `plugins` 目录；同一服务器不要同时放入两个角色包，也不要安装共享核心 JAR。
+1. 从项目构建产物中取得 `SimpMC-BedWars-版本.jar`。
+2. 将 JAR 放入服务端 `plugins` 目录；BUNGEE 模式的大厅和竞技场子服使用同一个 JAR，通过配置中的 `node-role` 区分角色。
 3. 启动服务器，看到插件成功启用后执行 `stop`。
 4. 编辑 `plugins/SimpMC-BedWars/config.yml`。
 5. 再次启动服务器。
@@ -26,12 +26,10 @@ Release 标签格式为 `v版本号-提交前八位`。同一版本号发生纯�
 最常修改的首次配置：
 
 ```yaml
-serverType: BUNGEE
+serverType: MULTIARENA
 language: zh_cn
 debug: false
 ```
-
-6.x 官方 Release 只提供面向代理网络的 Lobby/Arena 角色包；安装这两个 JAR 时必须使用 `serverType: BUNGEE`。`MULTIARENA` 与 `SHARED` 仍保留在核心代码中用于兼容，但不提供独立的官方安装包。
 
 ## 服务器模式
 
@@ -51,7 +49,7 @@ debug: false
 
 ### BUNGEE
 
-面向代理网络和自动扩容。BUNGEE 使用两个角色 JAR：`SimpMC-BedWars-Lobby-版本.jar` 固定为 `LOBBY`，只负责大厅、远程竞技场目录和跨服调度；`SimpMC-BedWars-Arena-版本.jar` 固定为 `ARENA`，只负责地图副本、对局和状态上报。两种角色都应连接同一个 MySQL 数据库，但只有 ARENA 节点记录本地对局统计。
+面向代理网络和自动扩容。BUNGEE 使用同一个 JAR，通过 `bungee-settings.node-role` 把 Paper 实例分成两种角色：`LOBBY` 只负责大厅、远程竞技场目录和跨服调度；`ARENA` 只负责地图副本、对局和状态上报。两种角色都应连接同一个 MySQL 数据库，但只有 ARENA 节点记录本地对局统计。
 
 该模式同样视为专用 BedWars 节点，实例内全部世界固定正午与晴天。
 
@@ -107,7 +105,7 @@ database:
   ssl: true
 ```
 
-复制多个 ARENA 子服时，只需为每台服务器复制同一张地图配置和缓存，修改 `server-id`、`proxy-server` 与代理地址；想承载另一张地图则使用另一台子服并修改 `arena-template`。旧版 BUNGEE 配置若不填写 `node-role`，仍按 ARENA 节点处理；`BUNGEE_LEGACY` 仍保留单实例兼容路径，但 6.x 官方角色包不使用该模式。
+复制多个 ARENA 子服时，只需为每台服务器复制同一张地图配置和缓存，修改 `server-id`、`proxy-server` 与代理地址；想承载另一张地图则使用另一台子服并修改 `arena-template`。旧版 BUNGEE 配置若不填写 `node-role`，仍按 ARENA 节点处理；`BUNGEE_LEGACY` 仍保留单实例兼容路径。
 
 大厅按以下顺序调度：筛选新鲜心跳、按 `group:` 或 `arena:` 选择、锁定一个空闲副本、向子服发送预加载请求，收到所有队员的确认后才通过代理发送 `Connect`。预加载超时或代理消息无法发出会释放预约；代理插件消息本身没有回执，因此实际切服失败仍应检查代理日志。
 
@@ -165,7 +163,7 @@ servers:
 
 1. 完整停止服务器。
 2. 备份 `plugins/SimpMC-BedWars` 和竞技场世界。
-3. 替换对应角色的旧 JAR，不要同时保留两个版本或把 Lobby/Arena 两个角色包放在同一服务器。
+3. 替换旧 JAR，不要同时保留两个版本。
 4. 启动服务器并查看配置迁移日志。
 5. 插件会为需要升级的 YAML 创建类似 `.v7.bak` 的备份，再写入新字段和中文注释。
 6. 检查控制台后完整测试大厅、加入、开局、死亡、复活和结束恢复。
@@ -180,4 +178,4 @@ cd SimpMC-BedWars
 mvn -B clean verify
 ```
 
-最终角色包位于 `bedwars-lobby/target/SimpMC-BedWars-Lobby-版本.jar` 和 `bedwars-arena/target/SimpMC-BedWars-Arena-版本.jar`；`bedwars-plugin/target/simpmc-bedwars-core-版本.jar` 仅是共享核心内部依赖。
+最终插件位于 `bedwars-plugin/target/SimpMC-BedWars-版本.jar`。

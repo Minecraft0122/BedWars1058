@@ -41,7 +41,7 @@
 
 ### BUNGEE 角色配置
 
-拆分部署时使用两个角色 JAR 和不同配置文件：大厅安装 `SimpMC-BedWars-Lobby-版本.jar`，竞技场子服安装 `SimpMC-BedWars-Arena-版本.jar`。共享核心 JAR 只在构建角色包时使用，不要单独放入 `plugins`。大厅只需要代理大厅和数据库信息，并开启 `node-role: LOBBY`：
+拆分部署时大厅与竞技场使用同一个插件 JAR、不同配置文件；通过 `bungee-settings.node-role` 区分 `LOBBY` 和 `ARENA`。大厅只需要代理大厅和数据库信息，并开启 `node-role: LOBBY`：
 
 ```yaml
 serverType: BUNGEE
@@ -53,8 +53,6 @@ bungee-settings:
     port: 2019
   socket-secret: "与所有 ARENA 子服相同的随机长字符串"
 ```
-
-角色 JAR 会在启动时校验并固定 `serverType: BUNGEE` 及对应的 `node-role`；配置中的不兼容值会自动迁移并在控制台给出中文警告。请勿在同一服务器同时安装 Lobby 和 Arena 包。
 
 竞技场子服设置 `node-role: ARENA`、唯一 `server-id`、代理后端键名和一张地图模板；同一模板可由 `auto-scale-clone-limit` 自动复制多个运行实例：
 
@@ -86,7 +84,7 @@ database:
   ssl: true
 ```
 
-建议为插件创建独立数据库用户，并只授予目标库的 `SELECT`、`INSERT`、`UPDATE`、`CREATE`、`ALTER`、`INDEX` 权限；自动汇总视图需要额外的 `CREATE VIEW` 权限，没有该权限时明细表和对局写入仍会工作。结构初始化和升级使用 MySQL 连接级 `GET_LOCK`/`RELEASE_LOCK` 协调，不会通过应用表锁阻塞新对局；在线字段升级的元数据锁等待时间很短，遇到其他管理员 DDL 时会稍后重试。对局和纪律写入只在短事务中锁定对应行，不要手动锁表。Lobby/Arena 角色 JAR 已内置 MySQL Connector/J，不需要再把驱动单独放进 Paper 的 `lib` 或 `plugins` 目录。修改连接信息后必须完整重启所有相关子服，不要使用 `/reload`。
+建议为插件创建独立数据库用户，并只授予目标库的 `SELECT`、`INSERT`、`UPDATE`、`CREATE`、`ALTER`、`INDEX` 权限；自动汇总视图需要额外的 `CREATE VIEW` 权限，没有该权限时明细表和对局写入仍会工作。结构初始化和升级使用 MySQL 连接级 `GET_LOCK`/`RELEASE_LOCK` 协调，不会通过应用表锁阻塞新对局；在线字段升级的元数据锁等待时间很短，遇到其他管理员 DDL 时会稍后重试。对局和纪律写入只在短事务中锁定对应行，不要手动锁表。最终单 JAR 已内置 MySQL Connector/J，不需要再把驱动单独放进 Paper 的 `lib` 或 `plugins` 目录。修改连接信息后必须完整重启所有相关子服，不要使用 `/reload`。
 
 对局统计配置示例：
 

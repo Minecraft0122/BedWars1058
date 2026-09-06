@@ -17,10 +17,10 @@
 ## 最短开服流程
 
 1. 创建 Paper 1.21.11 + Java 21，或 Paper 26.2 + Java 25 服务端。
-2. 按节点角色将 `SimpMC-BedWars-Lobby-版本.jar` 或 `SimpMC-BedWars-Arena-版本.jar` 放入 `plugins`，启动并等待配置生成；共享核心 JAR 不要单独安装。
-3. 停服，将 `plugins/SimpMC-BedWars/config.yml` 的 `language` 改为 `zh_cn`；6.x 角色包确认 `serverType: BUNGEE` 和对应的 `node-role`。
-4. BUNGEE 模式在 Lobby 服执行 `/bw setLobby`；MULTIARENA/SHARED 仅适用于核心代码兼容场景。
-5. 仅在 Arena 子服把竞技场世界文件夹放到服务端世界目录，执行 `/bw setupArena <世界名>`。
+2. 将 `SimpMC-BedWars-版本.jar` 放入 `plugins`，启动并等待配置生成。
+3. 停服，将 `plugins/SimpMC-BedWars/config.yml` 的 `language` 改为 `zh_cn`，确认 `serverType` 和（BUNGEE 模式下的）`node-role`。
+4. MULTIARENA/SHARED 模式进入主大厅执行 `/bw setLobby`；BUNGEE 模式按大厅配置执行。
+5. 把竞技场世界文件夹放到负责地图的后端，执行 `/bw setupArena <世界名>`。
 6. 按聊天中的引导设置等待点、队伍、出生点、NPC 和生成器。
 7. 执行 `/bw save`，然后 `/bw enableArena <世界名>`。
 8. 使用 `/bw join <世界名>` 或 `/bw gui` 测试完整一局。

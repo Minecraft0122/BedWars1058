@@ -21,7 +21,6 @@
 ## 主要功能
 
 - 支持 MULTIARENA、SHARED、BUNGEE（LOBBY/ARENA）和 BUNGEE-LEGACY 运行模式。
-- 6.x 发布包按 BUNGEE 节点角色拆分为 `SimpMC-BedWars-Lobby-版本.jar` 与 `SimpMC-BedWars-Arena-版本.jar`；共享核心 JAR 仅用于构建，不要单独放入 `plugins`。
 - 提供竞技场选择菜单、加入告示牌、Citizens NPC 和命令加入方式。
 - 支持单独配置竞技场分组、队伍、生成器、商店、团队升级、陷阱和初始物品。
 - 默认每 1 秒生成 2 铁、每 4 秒生成 2 金，并支持在 `generators.yml` 中按竞技场分组覆盖。
@@ -48,16 +47,14 @@
 ## 安装
 
 1. 准备 Paper 1.21.11 + Java 21，或 Paper 26.2 + Java 25。
-2. 按节点角色将 `SimpMC-BedWars-Lobby-版本.jar`（大厅）或 `SimpMC-BedWars-Arena-版本.jar`（竞技场子服）放入 `plugins` 目录；同一服务器只放一个角色包。
+2. 将 `SimpMC-BedWars-版本.jar` 放入 `plugins` 目录；BUNGEE 模式的大厅和竞技场子服使用同一个 JAR，通过配置中的 `node-role` 区分角色。
 3. 首次启动生成配置后完整停服。
 4. 按[安装教程](docs/zh_CN/installation.md)配置服务器模式和大厅。
-5. 重新启动；仅在 Arena 子服使用 `/bw setupArena <世界名>` 创建竞技场，Lobby 服不加载地图。
+5. 重新启动并使用 `/bw setupArena <世界名>` 创建竞技场；BUNGEE 模式下仅在 `ARENA` 节点执行地图配置命令。
 
 插件会自动迁移旧版配置：升级前创建 `.bak` 备份，删除已废弃字段，补充新字段和中文注释。不要使用 `/reload` 或插件热重载。
 
-6.x 官方发行包面向代理网络，使用时必须配置 `serverType: BUNGEE`；`MULTIARENA` 和 `SHARED` 仍保留在核心代码中用于兼容，但不随 Release 单独发布可安装 JAR。
-
-默认分支的每次提交都必须先通过完整 Maven 验证，随后自动上传 Lobby/Arena 两个 JAR 和 `SHA256SUMS.txt` 到 GitHub Releases。标签格式为 `v版本号-提交前八位`，因此即使同一插件版本只有文档或工作流更新，也不会发生标签冲突；工作流重跑不会重复创建 Release。
+默认分支的每次提交都必须先通过完整 Maven 验证，随后自动上传一个插件 JAR 和 `SHA256SUMS.txt` 到 GitHub Releases。标签格式为 `v版本号-提交前八位`，因此即使同一插件版本只有文档或工作流更新，也不会发生标签冲突；工作流重跑不会重复创建 Release。
 
 ## Vault 经济支持
 
@@ -73,8 +70,8 @@ Vault 是经济接口桥接层，本身不会创建玩家余额。要启用金�
 
 - `MULTIARENA`：一个 Paper 实例承载大厅和多张竞技场，适合独立小游戏服。
 - `SHARED`：与其他玩法共享实例，玩家离开竞技场后恢复进入前状态。
-- `BUNGEE`：代理网络的多竞技场自动扩容模式；使用 Lobby 和 Arena 两个角色 JAR，分别负责 `LOBBY` 调度服和 `ARENA` 子服，每个竞技场子服可只负责一张地图。
-- `BUNGEE-LEGACY`：一张竞技场占用一个后端实例的传统代理模式，仅保留核心代码兼容路径；6.x 官方 Release 不单独发布该模式的安装包。
+- `BUNGEE`：代理网络的多竞技场自动扩容模式；同一个 JAR 通过 `bungee-settings.node-role` 分为 `LOBBY` 调度服和 `ARENA` 子服，每个竞技场子服可只负责一张地图。
+- `BUNGEE-LEGACY`：一张竞技场占用一个后端实例的传统代理模式。
 
 ## 自行构建
 
@@ -84,7 +81,7 @@ cd SimpMC-BedWars
 mvn -B clean verify
 ```
 
-构建产物为 `bedwars-lobby/target/SimpMC-BedWars-Lobby-版本.jar` 和 `bedwars-arena/target/SimpMC-BedWars-Arena-版本.jar`。`bedwars-plugin/target/simpmc-bedwars-core-版本.jar` 是共享核心内部依赖，不作为安装或发布附件。
+构建产物位于 `bedwars-plugin/target/SimpMC-BedWars-版本.jar`。
 
 ## 参与贡献
 

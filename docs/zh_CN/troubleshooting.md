@@ -6,13 +6,9 @@
 
 1. 服务端确实是 Paper 1.21.11 或 Paper 26.2。
 2. Paper 1.21.11 的 `java -version` 至少为 21；Paper 26.2 必须为 25。
-3. `plugins` 中只放置一个与节点角色匹配的 SimpMC-BedWars JAR：大厅使用 `SimpMC-BedWars-Lobby-版本.jar`，竞技场使用 `SimpMC-BedWars-Arena-版本.jar`。
+3. `plugins` 中没有重复的 SimpMC-BedWars JAR；BUNGEE 模式的大厅和竞技场子服使用同一个 JAR，并通过配置中的 `node-role` 区分角色。
 
 Spigot、Folia、其他 Minecraft 版本，以及只提供 Paper 26 维度目录而缺少根级 `level.dat` 与 `region/` 的地图会被主动拒绝。竞技场原图必须保持旧版 Bukkit 根目录格式。
-
-## Lobby/Arena 角色包启动后角色不正确
-
-6.x 的两个发行包分别固定为 `LOBBY` 和 `ARENA`，启动时会把 `serverType` 与 `bungee-settings.node-role` 校正为匹配值。若大厅包加载了地图，或竞技场包没有加载竞技场，先确认文件名和 `plugin.yml` 入口类，再删除 `plugins` 中重复或旧版本 JAR 后完整重启；不要使用 `/reload`。角色包不能在同一服务器并存。
 
 ## 配置解析错误
 
@@ -84,7 +80,7 @@ Spigot、Folia、其他 Minecraft 版本，以及只提供 Paper 26 维度目录
 
 ## 世界没有保持正午或仍在下雨
 
-- 先确认实际加载的是 6.0.0 或更新 JAR，并完整重启；Paper 1.21.11 的现代规则名是 `advance_time` 与 `advance_weather`，旧版本按 `do_daylight_cycle` 查找会静默失效。
+- 先确认实际加载的是 6.1.1 或更新 JAR，并完整重启；Paper 1.21.11 的现代规则名是 `advance_time` 与 `advance_weather`，旧版本按 `do_daylight_cycle` 查找会静默失效。
 - 在控制台执行 `time query daytime` 应得到 `6000`，`gamerule advance_time` 和 `gamerule advance_weather` 应为 `false`。尝试 `/time set night` 或重新开启规则后，事件守卫仍会把结果恢复为正午和关闭状态。
 - `MULTIARENA`/`BUNGEE` 会处理实例中的全部世界；`SHARED` 只处理竞技场、待加载竞技场、设置世界和 `/bw setLobby` 保存的大厅。SHARED 的其他玩法世界保持管理员原有时间与天气。
 - 已经下雨的世界切换晴天后，原版雨量视觉最多需要约 100 tick 完成淡出。正午晴天只保证普通主世界露天的最高自然天空亮度，不会照亮洞穴、屋内、下界或末地。

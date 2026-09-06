@@ -1,5 +1,13 @@
 # 更新记录
 
+## 6.1.1 - 2026-09-06
+
+### 发布方式纠正
+
+- 恢复原仓库的单 JAR 发布方式：`SimpMC-BedWars-6.1.1.jar` 同时支持大厅和竞技场子服，BUNGEE 模式通过 `bungee-settings.node-role` 区分 `LOBBY` 与 `ARENA`。
+- `6.1.0` 的双包产物已由本版本取代；旧的统计、MySQL、纪律、VL、挂机、逃跑、重连租约和跨服调度逻辑继续保留，不需要为每种节点单独安装 JAR。
+- 自动发布重新校验单个 JAR 的版本与 `plugin.yml` 入口 `com.andrei1058.bedwars.BedWars`，并生成对应的 `SHA256SUMS.txt`。
+
 ## 6.1.0 - 2026-09-06
 
 ### 角色发行包与对局治理
