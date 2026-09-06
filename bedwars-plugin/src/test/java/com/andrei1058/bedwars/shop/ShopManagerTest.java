@@ -87,6 +87,56 @@ class ShopManagerTest {
     }
 
     @Test
+    void migrationReplacesLegacyHorseSpawnEggDreamDefender() {
+        YamlConfiguration yml = new YamlConfiguration();
+        String tier = ConfigPath.SHOP_PATH_CATEGORY_UTILITY + ConfigPath.SHOP_CATEGORY_CONTENT_PATH
+                + ".dream-defender." + ConfigPath.SHOP_CATEGORY_CONTENT_CONTENT_TIERS + ".tier1";
+        yml.set(tier + ConfigPath.SHOP_CONTENT_TIER_ITEM_MATERIAL, "HORSE_SPAWN_EGG");
+        yml.set(tier + "." + ConfigPath.SHOP_CONTENT_BUY_ITEMS_PATH + ".defender.material", "horse_spawn_egg");
+        yml.set(tier + "." + ConfigPath.SHOP_CONTENT_BUY_ITEMS_PATH + ".defender.amount", 1);
+
+        ShopManager.migrateDreamDefenderMaterial(yml);
+
+        assertEquals("IRON_GOLEM_SPAWN_EGG", yml.getString(tier + ConfigPath.SHOP_CONTENT_TIER_ITEM_MATERIAL));
+        assertEquals("IRON_GOLEM_SPAWN_EGG",
+                yml.getString(tier + "." + ConfigPath.SHOP_CONTENT_BUY_ITEMS_PATH + ".defender.material"));
+        assertEquals(1, yml.getInt(tier + "." + ConfigPath.SHOP_CONTENT_BUY_ITEMS_PATH + ".defender.amount"));
+    }
+
+    @Test
+    void migrationFollowsTheConfiguredIronGolemSpecialMaterial() {
+        YamlConfiguration yml = new YamlConfiguration();
+        yml.set(ConfigPath.SHOP_SPECIAL_IRON_GOLEM_MATERIAL, "SNOW_GOLEM_SPAWN_EGG");
+        String tier = ConfigPath.SHOP_PATH_CATEGORY_UTILITY + ConfigPath.SHOP_CATEGORY_CONTENT_PATH
+                + ".dream-defender." + ConfigPath.SHOP_CATEGORY_CONTENT_CONTENT_TIERS + ".tier1";
+        yml.set(tier + ConfigPath.SHOP_CONTENT_TIER_ITEM_MATERIAL, "HORSE_SPAWN_EGG");
+        yml.set(tier + "." + ConfigPath.SHOP_CONTENT_BUY_ITEMS_PATH + ".defender.material", "HORSE_SPAWN_EGG");
+
+        ShopManager.migrateDreamDefenderMaterial(yml);
+
+        assertEquals("SNOW_GOLEM_SPAWN_EGG", yml.getString(tier + ConfigPath.SHOP_CONTENT_TIER_ITEM_MATERIAL));
+        assertEquals("SNOW_GOLEM_SPAWN_EGG",
+                yml.getString(tier + "." + ConfigPath.SHOP_CONTENT_BUY_ITEMS_PATH + ".defender.material"));
+    }
+
+    @Test
+    void migrationPreservesCustomDreamDefenderMaterials() {
+        YamlConfiguration yml = new YamlConfiguration();
+        String tier = ConfigPath.SHOP_PATH_CATEGORY_UTILITY + ConfigPath.SHOP_CATEGORY_CONTENT_PATH
+                + ".dream-defender." + ConfigPath.SHOP_CATEGORY_CONTENT_CONTENT_TIERS + ".tier1";
+        yml.set(tier + ConfigPath.SHOP_CONTENT_TIER_ITEM_MATERIAL, "IRON_BLOCK");
+        yml.set(tier + "." + ConfigPath.SHOP_CONTENT_BUY_ITEMS_PATH + ".defender.material", "IRON_GOLEM_SPAWN_EGG");
+
+        ShopManager.migrateDreamDefenderMaterial(yml);
+
+        assertEquals("IRON_BLOCK", yml.getString(tier + ConfigPath.SHOP_CONTENT_TIER_ITEM_MATERIAL));
+        assertEquals("IRON_GOLEM_SPAWN_EGG",
+                yml.getString(tier + "." + ConfigPath.SHOP_CONTENT_BUY_ITEMS_PATH + ".defender.material"));
+        assertNull(yml.get(ConfigPath.SHOP_PATH_CATEGORY_UTILITY + ConfigPath.SHOP_CATEGORY_CONTENT_PATH
+                + ".dream-defender.content-tiers.tier2"));
+    }
+
+    @Test
     void migrationPreservesAnExistingRecallScroll() {
         YamlConfiguration yml = new YamlConfiguration();
         String content = ConfigPath.SHOP_PATH_CATEGORY_UTILITY + ConfigPath.SHOP_CATEGORY_CONTENT_PATH

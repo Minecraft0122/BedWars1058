@@ -272,6 +272,7 @@ public class ConfigPath {
     public static final String GENERAL_TNT_JUMP_DAMAGE_SELF = GENERAL_TNT_JUMP_PATH + ".damage-self";
     public static final String GENERAL_TNT_JUMP_DAMAGE_TEAMMATES = GENERAL_TNT_JUMP_PATH + ".damage-teammates";
     public static final String GENERAL_TNT_JUMP_DAMAGE_OTHERS = GENERAL_TNT_JUMP_PATH + ".damage-others";
+    public static final String GENERAL_TNT_KNOCKBACK_MULTIPLIER = GENERAL_TNT_JUMP_PATH + ".knockback-multiplier";
 
     public static final String GENERAL_TNT_BLAST_PROTECTION = "blast-protection";
     public static final String GENERAL_TNT_PROTECTION_END_STONE_BLAST = GENERAL_TNT_BLAST_PROTECTION+".end-stone";

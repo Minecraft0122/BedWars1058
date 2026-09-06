@@ -29,6 +29,34 @@ class FireballListenerTest {
     }
 
     @Test
+    void deliversFullHorizontalKnockbackRegardlessOfHeightDifference() {
+        Vector explosion = new Vector(0, 64, 0);
+
+        Vector level = FireballListener.calculateKnockback(
+                explosion, new Vector(2, 64, 0), 1.35, 0.75);
+        Vector above = FireballListener.calculateKnockback(
+                explosion, new Vector(2, 67, 0), 1.35, 0.75);
+        Vector diagonal = FireballListener.calculateKnockback(
+                explosion, new Vector(1, 62, 1), 1.35, 0.75);
+
+        assertEquals(1.35, level.getX(), 1.0E-9);
+        assertEquals(1.35, above.getX(), 1.0E-9);
+        assertEquals(0D, above.getZ(), 1.0E-9);
+        assertEquals(1.35, Math.hypot(diagonal.getX(), diagonal.getZ()), 1.0E-9);
+        assertTrue(above.getY() > 0);
+    }
+
+    @Test
+    void playersDirectlyAboveTheExplosionOnlyReceiveVerticalKnockback() {
+        Vector knockback = FireballListener.calculateKnockback(
+                new Vector(0, 64, 0), new Vector(0, 66, 0), 1.35, 0.75);
+
+        assertEquals(0D, knockback.getX());
+        assertEquals(0D, knockback.getZ());
+        assertTrue(knockback.getY() > 0);
+    }
+
+    @Test
     void includesPlayersOnTheSphericalExplosionBoundary() {
         assertTrue(FireballListener.isWithinExplosionRadius(
                 new Vector(0D, 64D, 0D), new Vector(3D, 68D, 0D), 5D));

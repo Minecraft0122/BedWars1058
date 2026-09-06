@@ -118,7 +118,7 @@ class MainConfigTest {
         MainConfig.migrateFireballDefaults(configuration, 16);
 
         assertEquals(3.25, configuration.getDouble(ConfigPath.GENERAL_FIREBALL_EXPLOSION_SIZE));
-        assertEquals(1.15, configuration.getDouble(ConfigPath.GENERAL_FIREBALL_KNOCKBACK_HORIZONTAL));
+        assertEquals(1.35, configuration.getDouble(ConfigPath.GENERAL_FIREBALL_KNOCKBACK_HORIZONTAL));
         assertEquals(0.75, configuration.getDouble(ConfigPath.GENERAL_FIREBALL_KNOCKBACK_VERTICAL));
         assertEquals(3.5, configuration.getDouble(ConfigPath.GENERAL_FIREBALL_DAMAGE_ENEMY));
         assertEquals(1.75, configuration.getDouble(ConfigPath.GENERAL_FIREBALL_DAMAGE_SELF));
@@ -243,9 +243,47 @@ class MainConfigTest {
         MainConfig.migrateFireballDefaults(configuration, 9);
 
         assertEquals(3.25, configuration.getDouble(ConfigPath.GENERAL_FIREBALL_EXPLOSION_SIZE));
-        assertEquals(1.15, configuration.getDouble(ConfigPath.GENERAL_FIREBALL_KNOCKBACK_HORIZONTAL));
+        assertEquals(1.35, configuration.getDouble(ConfigPath.GENERAL_FIREBALL_KNOCKBACK_HORIZONTAL));
         assertEquals(0.75, configuration.getDouble(ConfigPath.GENERAL_FIREBALL_KNOCKBACK_VERTICAL));
         assertEquals(3.5, configuration.getDouble(ConfigPath.GENERAL_FIREBALL_DAMAGE_ENEMY));
+    }
+
+    @Test
+    void schema34RaisesOnlyTheBuiltInFireballHorizontalKnockback() {
+        YamlConfiguration builtIn = new YamlConfiguration();
+        builtIn.set(ConfigPath.GENERAL_FIREBALL_KNOCKBACK_HORIZONTAL, 1.15);
+        YamlConfiguration custom = new YamlConfiguration();
+        custom.set(ConfigPath.GENERAL_FIREBALL_KNOCKBACK_HORIZONTAL, 1.2);
+        YamlConfiguration current = new YamlConfiguration();
+        current.set(ConfigPath.GENERAL_FIREBALL_KNOCKBACK_HORIZONTAL, 1.15);
+
+        MainConfig.migrateFireballDefaults(builtIn, 33);
+        MainConfig.migrateFireballDefaults(custom, 33);
+        MainConfig.migrateFireballDefaults(current, 34);
+
+        assertEquals(1.35, builtIn.getDouble(ConfigPath.GENERAL_FIREBALL_KNOCKBACK_HORIZONTAL));
+        assertEquals(1.2, custom.getDouble(ConfigPath.GENERAL_FIREBALL_KNOCKBACK_HORIZONTAL));
+        assertEquals(1.15, current.getDouble(ConfigPath.GENERAL_FIREBALL_KNOCKBACK_HORIZONTAL));
+    }
+
+    @Test
+    void schema34LowersOnlyTheBuiltInTntEnemyDamage() {
+        YamlConfiguration builtIn = new YamlConfiguration();
+        builtIn.set(ConfigPath.GENERAL_TNT_JUMP_DAMAGE_OTHERS, 10);
+        builtIn.set(ConfigPath.GENERAL_TNT_JUMP_DAMAGE_TEAMMATES, 5);
+        YamlConfiguration custom = new YamlConfiguration();
+        custom.set(ConfigPath.GENERAL_TNT_JUMP_DAMAGE_OTHERS, 8);
+        YamlConfiguration current = new YamlConfiguration();
+        current.set(ConfigPath.GENERAL_TNT_JUMP_DAMAGE_OTHERS, 10);
+
+        MainConfig.migrateTntDefaults(builtIn, 33);
+        MainConfig.migrateTntDefaults(custom, 33);
+        MainConfig.migrateTntDefaults(current, 34);
+
+        assertEquals(6.0, builtIn.getDouble(ConfigPath.GENERAL_TNT_JUMP_DAMAGE_OTHERS));
+        assertEquals(5, builtIn.getInt(ConfigPath.GENERAL_TNT_JUMP_DAMAGE_TEAMMATES));
+        assertEquals(8, custom.getInt(ConfigPath.GENERAL_TNT_JUMP_DAMAGE_OTHERS));
+        assertEquals(10, current.getInt(ConfigPath.GENERAL_TNT_JUMP_DAMAGE_OTHERS));
     }
 
     @Test

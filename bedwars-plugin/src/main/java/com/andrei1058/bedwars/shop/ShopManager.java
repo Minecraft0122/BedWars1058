@@ -42,7 +42,9 @@ import org.bukkit.plugin.PluginManager;
 @SuppressWarnings("WeakerAccess")
 public class ShopManager extends ConfigManager {
 
-    private static final int CONFIG_VERSION = 8;
+    private static final int CONFIG_VERSION = 9;
+    static final String DREAM_DEFENDER_LEGACY_MATERIAL = "HORSE_SPAWN_EGG";
+    static final String DREAM_DEFENDER_DEFAULT_MATERIAL = "IRON_GOLEM_SPAWN_EGG";
 
     public static ShopIndex shop;
 
@@ -314,8 +316,8 @@ public class ShopManager extends ConfigManager {
                     0, 1, "", "", "", false);
 
             adCategoryContentTier(ConfigPath.SHOP_PATH_CATEGORY_UTILITY, "dream-defender", 21, "tier1",
-                    "HORSE_SPAWN_EGG", 0, 1, false, 120, "iron", false, false);
-            addBuyItem(ConfigPath.SHOP_PATH_CATEGORY_UTILITY, "dream-defender", "tier1", "defender", "HORSE_SPAWN_EGG",
+                    DREAM_DEFENDER_DEFAULT_MATERIAL, 0, 1, false, 120, "iron", false, false);
+            addBuyItem(ConfigPath.SHOP_PATH_CATEGORY_UTILITY, "dream-defender", "tier1", "defender", DREAM_DEFENDER_DEFAULT_MATERIAL,
                     0, 1, "", "", "", false);
 
             adCategoryContentTier(ConfigPath.SHOP_PATH_CATEGORY_UTILITY, "fireball", 22, "tier1",
@@ -404,7 +406,45 @@ public class ShopManager extends ConfigManager {
             migrateLowerBodyArmorOnly(config);
             migrateRecallScroll(config);
             migrateSelfRescuePlatform(config);
+            migrateDreamDefenderMaterial(config);
         });
+    }
+
+    /**
+     * The dream defender used to be sold as a horse spawn egg while the special
+     * item listener only reacted to the configured iron golem material, so the
+     * purchased egg could never summon the defender. Align every legacy horse
+     * spawn egg in the dream defender content with the configured special
+     * material; administrator customised materials are left alone.
+     */
+    static void migrateDreamDefenderMaterial(YamlConfiguration config) {
+        String contentPath = ConfigPath.SHOP_PATH_CATEGORY_UTILITY + ConfigPath.SHOP_CATEGORY_CONTENT_PATH
+                + ".dream-defender";
+        String tiersRoot = contentPath + "." + ConfigPath.SHOP_CATEGORY_CONTENT_CONTENT_TIERS;
+        ConfigurationSection tiers = config.getConfigurationSection(tiersRoot);
+        if (tiers == null) return;
+
+        String target = config.getString(ConfigPath.SHOP_SPECIAL_IRON_GOLEM_MATERIAL, DREAM_DEFENDER_DEFAULT_MATERIAL);
+        if (target == null || target.isBlank() || Material.matchMaterial(target) == null) {
+            target = DREAM_DEFENDER_DEFAULT_MATERIAL;
+        }
+        for (String tier : tiers.getKeys(false)) {
+            String tierPath = tiersRoot + "." + tier;
+            replaceLegacyDreamDefenderMaterial(config, tierPath + ConfigPath.SHOP_CONTENT_TIER_ITEM_MATERIAL, target);
+            ConfigurationSection items = config.getConfigurationSection(
+                    tierPath + "." + ConfigPath.SHOP_CONTENT_BUY_ITEMS_PATH);
+            if (items == null) continue;
+            for (String item : items.getKeys(false)) {
+                replaceLegacyDreamDefenderMaterial(config, items.getCurrentPath() + "." + item + ".material", target);
+            }
+        }
+    }
+
+    private static void replaceLegacyDreamDefenderMaterial(YamlConfiguration config, String path, String target) {
+        String material = config.getString(path);
+        if (material != null && DREAM_DEFENDER_LEGACY_MATERIAL.equalsIgnoreCase(material.trim())) {
+            config.set(path, target);
+        }
     }
 
     static void migrateLowerBodyArmorOnly(YamlConfiguration config) {

@@ -266,7 +266,7 @@ public class BedWars extends JavaPlugin {
         SelfRescuePlatform selfRescuePlatform = new SelfRescuePlatform();
         registerEvents(
                 new EnderPearlLanded(), new QuitAndTeleportListener(), new ArenaWorldProtection(), new BreakPlace(),
-                new PlacedBlockListener(), new DamageDeathMove(),
+                new PlacedBlockListener(), new DamageDeathMove(), new TntKnockbackListener(),
                 new Inventory(), new Interact(), new LobbyProtection(), new LobbyPortalListener(), new RefreshGUI(), new HungerWeatherSpawn(), new CmdProcess(),
                 new FireballListener(), new EggBridge(), new SpectatorListeners(), new BaseListener(),
                 new TargetListener(), new Warnings(this), new ChatAFK(),
