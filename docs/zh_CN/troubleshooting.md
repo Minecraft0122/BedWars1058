@@ -6,9 +6,13 @@
 
 1. 服务端确实是 Paper 1.21.11 或 Paper 26.2。
 2. Paper 1.21.11 的 `java -version` 至少为 21；Paper 26.2 必须为 25。
-3. `plugins` 中没有重复的 SimpMC-BedWars JAR。
+3. `plugins` 中只放置一个与节点角色匹配的 SimpMC-BedWars JAR：大厅使用 `SimpMC-BedWars-Lobby-版本.jar`，竞技场使用 `SimpMC-BedWars-Arena-版本.jar`。
 
 Spigot、Folia、其他 Minecraft 版本，以及只提供 Paper 26 维度目录而缺少根级 `level.dat` 与 `region/` 的地图会被主动拒绝。竞技场原图必须保持旧版 Bukkit 根目录格式。
+
+## Lobby/Arena 角色包启动后角色不正确
+
+6.x 的两个发行包分别固定为 `LOBBY` 和 `ARENA`，启动时会把 `serverType` 与 `bungee-settings.node-role` 校正为匹配值。若大厅包加载了地图，或竞技场包没有加载竞技场，先确认文件名和 `plugin.yml` 入口类，再删除 `plugins` 中重复或旧版本 JAR 后完整重启；不要使用 `/reload`。角色包不能在同一服务器并存。
 
 ## 配置解析错误
 
@@ -17,6 +21,20 @@ Spigot、Folia、其他 Minecraft 版本，以及只提供 Paper 26 维度目录
 - 对比自动生成的 `.bak`。
 - 不要手动修改 `config-version`。
 - Material、Sound、Enchantment、PotionEffect 使用 Paper 1.21.11 名称。
+
+## MySQL 表初始化、对局写入或纪律处罚异常
+
+- 确认所有 BUNGEE 后端使用同一个 `database` 配置和同一个数据库名；`server-id` 仍必须各不相同。修改连接信息后完整重启相关后端，不要使用 `/reload`。
+- 首次启动会异步创建 `bw_matches`、`bw_match_players`、`bw_match_events`、`bw_match_reports`、`bw_player_violation_totals`、`bw_player_discipline` 和 `bw_discipline_penalties`。数据库账户至少需要目标库的 `SELECT`、`INSERT`、`UPDATE`、`CREATE`、`ALTER`、`INDEX` 权限；`bw_player_match_summary` 视图还需要 `CREATE VIEW`。
+- 结构变更使用 MySQL 连接级命名锁协调，不会锁住整张对局表；统计、纪律和每 5 分钟快照使用异步短事务。若日志显示获取 schema coordinator 超时，先确认没有其他管理员正在执行 DDL，再等待下一次重试，不要手动 `LOCK TABLES`。
+- 对局开始或匹配明显变慢时，检查数据库连接池、磁盘 I/O 和慢查询；正常的纪律写入只锁一名玩家的纪律行，不应等待 `bw_matches` 全表锁。若数据库不可用，控制台会保留告警，主线程仍应能开始新对局。
+- 没有处罚或玩家总是被拒绝重连时，检查 `discipline.enabled`、`voluntary-leave-punishment`、`disconnect-timeout-punishment` 和 `afk.enabled`；`cooldowns` 中的 `0` 只记录事件，不产生冷却。纪律冷却期间允许旁观但拒绝正式加入，这是预期行为。
+
+## 玩家被判定挂机或放弃对局
+
+- 默认挂机阶段为 60 秒提醒、120 秒最后提醒、180 秒移出。移动到新的方块、交互、战斗、放置/破坏、物品点击、丢弃、拾取和聊天都会刷新活动时间。
+- 死亡等待、复活、旁观、断线重连窗口和跨服传送会暂停挂机计时；如果玩家仍在这些状态被移出，请记录对局 UUID、玩家 UUID、`GamePlayingTask` 相关日志和是否在代理切服期间。
+- `/bw leave`、服务器/反作弊踢出和重连超时属于不同的放弃原因。重连超时后无法再次加入当前对局是预期行为；新的对局仍可能因纪律冷却被拒绝，提示中的剩余秒数来自 MySQL 纪律表。
 
 ## 控制台出现大量 `DEBUG:` 日志
 

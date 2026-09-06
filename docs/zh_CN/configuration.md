@@ -27,6 +27,7 @@
 - `fireball`：火球速度、射程、爆炸、击退、冷却和伤害。`speed-multiplier: 15` 对应普通初速度 1.5 格/tick；潜行时 `sneak-speed-multiplier: 1.6` 使初速度达到 2.4 格/tick，形成明显的初速度差异。`sneak-acceleration-multiplier: 2.0` 保持不变，持续加速度仍由普通火球的每 tick 0.1 提高到潜行火球的 0.2。每次发射会在 `flight-range.min: 200` 与 `flight-range.max: 300` 之间随机一次最大飞行距离，并按实际路径累计；碰撞、世界边界、服务端视距和未加载区块仍可能让火球提前结束。`sneak-recoil: 0.10` 会沿火球发射速度的完整三维反方向推动玩家，代码硬限制最大为 0.20；`cooldown: 0.4` 的持续射速约为每秒 2.5 发，一个 1 秒窗口内通常可发射 2 至 3 个。`explosion-size` 是以火球位置为球心的三维半径，伤害和击退只对欧氏距离不超过该半径的玩家生效，不会覆盖外接立方体的角落；队友始终不会受到火球伤害，但仍会按原有规则受到击退。2.10.20 的平衡默认值仍为爆炸范围 3.25、水平击退 1.15、垂直击退 0.75、敌方伤害 3.5。`make-fire` 只决定爆炸处是否生成火焰，竞技场不会允许火势向周围蔓延。
 - `database`：MySQL；关闭时使用 SQLite。
 - `match-statistics`：按对局保存统计和事件。只有 `database.enable: true` 且 MySQL 连接成功时启用；默认时区为 `Asia/Shanghai`，上报间隔默认 300 秒（5 分钟）。数据写入 `bw_matches`、`bw_match_players`、`bw_match_events`、`bw_match_reports` 和 `bw_player_violation_totals`，均使用 InnoDB 短事务。`bw_player_match_summary` 是按已结束对局汇总的只读视图，可直接用于大厅排行榜和玩家比较；若数据库账户没有 `CREATE VIEW` 权限，明细表仍会正常工作。
+- `discipline`：跨服务器纪律策略。`enabled` 控制纪律表和处罚入口；`voluntary-leave-punishment`、`disconnect-timeout-punishment` 分别控制主动离局和断线重连超时是否计入放弃；`afk.enabled` 开启挂机检测，默认在 60 秒、120 秒警告，180 秒移出；三个 `cooldowns` 列表按第 1、2、3、5 次累计事件给出 AFK/放弃冷却秒数，`violation.cooldowns` 按非法行为累计次数给出违规冷却。设为 `0` 表示该次只记录、不阻止重新加入。
 - `performance-settings`：Paper 传送、资源旋转等优化。
 - `lobby-items`、`pre-game-items`、`spectator-items`：不同阶段的命令物品。主大厅默认提供历史战绩、竞技场选择器和第 9 格的“回到主大厅”红床；大厅红床带有独立目标标记，固定连接代理配置中的 `lobbyServer`，MULTIARENA 模式也会执行代理切服，不传送到本服 `/bw setLobby` 坐标。等待区和观战区红床使用另一目标标记，直接返回本服 BedWars 大厅，不经过命令权限。管理员可以修改显示材质和命令文本，内置 `leave` 项的返回语义仍由其配置节点名确定。4.0.8 起，删除整个物品节点后，后续配置升级不会再次生成；旧架构 15 曾误删的自定义 `leave` 会在当前值仍为内置默认值时，从架构 15 删除前的最后快照，或架构 15–17 中重新配置过的最新 `config.yml.v*.bak` 自动恢复；架构 18 后的删除或改写快照会否决旧值。玩家进入大厅时会立即替换旧 BedWars 命令物品，并在 15 tick 后做一次带实时上下文校验的选择性复核，不再由延迟任务清空正常流程的整个背包；经传送门或附属插件跨世界进入大厅也走同一入口。无效物品只跳过自身，同槽位配置会输出中文警告，代理返回项具有稳定优先级。完整代理示例见[安装文档](installation.md#bungee)。
 - 大厅进入/离开提示只向同样位于 BedWars 大厅的玩家发送；竞技场、观战者和地图设置会话不会收到。大厅世界名直接从 `lobbyLoc` 文本读取，即使该世界在插件加载时尚未加载也能正确识别。大厅和加入 NPC 的旧朝向会自动迁移为最近的 90 度 yaw，pitch 固定为 0。
@@ -40,7 +41,7 @@
 
 ### BUNGEE 角色配置
 
-拆分部署时大厅与竞技场使用同一个插件 JAR、不同配置文件。大厅只需要代理大厅和数据库信息，并开启 `node-role: LOBBY`：
+拆分部署时使用两个角色 JAR 和不同配置文件：大厅安装 `SimpMC-BedWars-Lobby-版本.jar`，竞技场子服安装 `SimpMC-BedWars-Arena-版本.jar`。共享核心 JAR 只在构建角色包时使用，不要单独放入 `plugins`。大厅只需要代理大厅和数据库信息，并开启 `node-role: LOBBY`：
 
 ```yaml
 serverType: BUNGEE
@@ -52,6 +53,8 @@ bungee-settings:
     port: 2019
   socket-secret: "与所有 ARENA 子服相同的随机长字符串"
 ```
+
+角色 JAR 会在启动时校验并固定 `serverType: BUNGEE` 及对应的 `node-role`；配置中的不兼容值会自动迁移并在控制台给出中文警告。请勿在同一服务器同时安装 Lobby 和 Arena 包。
 
 竞技场子服设置 `node-role: ARENA`、唯一 `server-id`、代理后端键名和一张地图模板；同一模板可由 `auto-scale-clone-limit` 自动复制多个运行实例：
 
@@ -83,7 +86,7 @@ database:
   ssl: true
 ```
 
-建议为插件创建独立数据库用户，并只授予目标库的 `SELECT`、`INSERT`、`UPDATE`、`CREATE`、`ALTER`、`INDEX` 权限；自动汇总视图需要额外的 `CREATE VIEW` 权限，没有该权限时明细表和对局写入仍会工作。最终 JAR 已内置 MySQL Connector/J，不需要再把驱动单独放进 Paper 的 `lib` 或 `plugins` 目录。修改连接信息后必须完整重启所有相关子服，不要使用 `/reload`。
+建议为插件创建独立数据库用户，并只授予目标库的 `SELECT`、`INSERT`、`UPDATE`、`CREATE`、`ALTER`、`INDEX` 权限；自动汇总视图需要额外的 `CREATE VIEW` 权限，没有该权限时明细表和对局写入仍会工作。结构初始化和升级使用 MySQL 连接级 `GET_LOCK`/`RELEASE_LOCK` 协调，不会通过应用表锁阻塞新对局；在线字段升级的元数据锁等待时间很短，遇到其他管理员 DDL 时会稍后重试。对局和纪律写入只在短事务中锁定对应行，不要手动锁表。Lobby/Arena 角色 JAR 已内置 MySQL Connector/J，不需要再把驱动单独放进 Paper 的 `lib` 或 `plugins` 目录。修改连接信息后必须完整重启所有相关子服，不要使用 `/reload`。
 
 对局统计配置示例：
 
@@ -100,6 +103,25 @@ match-statistics:
     warning-thresholds: [10, 20, 50, 100]
     match-leave-threshold: 25
     cross-team-item-transfer: true
+```
+
+纪律配置示例：
+
+```yaml
+discipline:
+  enabled: true
+  voluntary-leave-punishment: true
+  disconnect-timeout-punishment: true
+  afk:
+    enabled: true
+    warning-seconds: 60
+    final-warning-seconds: 120
+    removal-seconds: 180
+    cooldowns: [0, 600, 3600, 86400]
+  abandonment:
+    cooldowns: [300, 900, 3600, 86400]
+  violation:
+    cooldowns: [1800]
 ```
 
 ### 对局统计与 VL
@@ -120,6 +142,14 @@ match-statistics:
 - 双方在 15 秒内正常互相造成伤害、双方互相拆床或在 120 秒内互相击杀：写入 `-3`、`-4`、`-2` 的排除证据，降低本局 `effective_vl`，但不会倒扣两个正向 VL 字段。
 
 单局 `effective_vl` 严格超过 `match-leave-threshold`（默认 25）时，插件记录 `VIOLATION_EJECT` 后在下一 tick 调用 `IArena.removePlayer(player, false)` 将玩家送出当前对局。该检查只看当前 `MatchRecord`，且会在游戏结束事件发出后停止；已经掉线或不在竞技场的玩家只保留审计记录，不会异步操作 Bukkit 世界。被标记处罚的玩家会在最终结算事务中自动清零累计处罚值，犯罪记录不会清除；外部处罚系统仍可按需调用 `resetPunishmentVl(UUID)`。
+
+### 纪律、挂机与放弃对局
+
+纪律状态保存在 `bw_player_discipline`，每次事件的审计记录保存在 `bw_discipline_penalties`。两张表使用 InnoDB；相同玩家、对局、类别和原因的重复回调通过唯一键去重，因此大厅和竞技场同时收到旧重连消息时不会重复加罚。纪律状态读取在异步登录回调中执行并带 2.5 秒上限；数据库短暂不可用时不会阻塞 Bukkit 主线程。
+
+活动玩家在进行中的对局内按方块级移动、交互、战斗、放置/破坏、物品点击、丢弃、拾取和聊天刷新活动时间。60 秒没有活动时发送第一次提醒，120 秒发送最后提醒，达到 180 秒后记录 `AFK_REMOVED` 并移出对局。死亡等待、复活、旁观、离线重连窗口和代理跨服转移会暂停计时，恢复为正式存活玩家后再继续；只在大厅旁观不会触发挂机处罚。
+
+`/bw leave`（主动离局）、服务器或反作弊踢出、以及重连租约到期分别记录 `VOLUNTARY_LEAVE`、`KICKED`、`DISCONNECT_TIMEOUT`。这些事件会记录 `ABANDONED` 结算并按 `abandonment.cooldowns` 计算冷却；冷却中的玩家仍可进入旁观，但正式加入或 `/rejoin` 会收到剩余秒数和处罚原因。单局违规移出使用 `VIOLATION_REMOVED`，与挂机/放弃在统计汇总中分开。
 
 常用汇总查询示例：
 

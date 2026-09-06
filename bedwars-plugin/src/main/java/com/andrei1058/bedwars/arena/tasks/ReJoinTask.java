@@ -23,7 +23,6 @@ package com.andrei1058.bedwars.arena.tasks;
 import com.andrei1058.bedwars.BedWars;
 import com.andrei1058.bedwars.api.arena.IArena;
 import com.andrei1058.bedwars.api.arena.team.ITeam;
-import com.andrei1058.bedwars.api.configuration.ConfigPath;
 import com.andrei1058.bedwars.arena.ReJoin;
 import org.bukkit.Bukkit;
 import org.bukkit.scheduler.BukkitTask;
@@ -50,7 +49,7 @@ public class ReJoinTask implements Runnable {
         this.arena = arena;
         this.bedWarsTeam = bedWarsTeam;
         task = Bukkit.getScheduler().runTaskLater(BedWars.plugin, this,
-                Math.max(1, BedWars.config.getInt(ConfigPath.GENERAL_CONFIGURATION_REJOIN_TIME)) * 20L);
+                ReJoin.rejoinWindowSeconds() * 20L);
         reJoinTasks.add(this);
     }
 
