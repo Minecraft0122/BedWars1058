@@ -667,7 +667,9 @@ public class Sidebar {
         // assigned and later reuse the same collision team.
         applyTeamColor(team, tab);
 
-        Team.OptionStatus visibility = tab.getNameTagVisibility() == PlayerTab.NameTagVisibility.NEVER
+        Team.OptionStatus visibility = sharedCollision
+                ? Team.OptionStatus.ALWAYS
+                : tab.getNameTagVisibility() == PlayerTab.NameTagVisibility.NEVER
                 ? Team.OptionStatus.NEVER
                 : Team.OptionStatus.ALWAYS;
         if ((!sharedCollision || newTeam)

@@ -644,7 +644,6 @@ public class Arena implements IArena {
             SidebarService sidebarService = SidebarService.getInstance();
             if (!playerBefore) sidebarService.giveSidebar(p, this, false);
             nms.setCollide(p, this, false);
-
             if (!playerBefore) {
                 if (staffTeleport == null) {
                     TeleportManager.teleportC(p, getSpectatorLocation(), PlayerTeleportEvent.TeleportCause.PLUGIN);
@@ -786,7 +785,6 @@ public class Arena implements IArena {
         // A player may leave while waiting for a respawn. Restore the entity
         // flag before the arena association is removed.
         nms.setCollide(p, this, true);
-
         if (status == GameState.playing) {
             for (ITeam t : getTeams()) {
                 if (t.isMember(p)) {
@@ -1032,7 +1030,6 @@ public class Arena implements IArena {
         p.getInventory().setArmorContents(null);
         InvisibilityManager.remove(this, p);
         nms.setCollide(p, this, true);
-
         Arena.afkCheck.remove(p.getUniqueId());
         BedWars.getAPI().getAFKUtil().setPlayerAFK(p, false);
 

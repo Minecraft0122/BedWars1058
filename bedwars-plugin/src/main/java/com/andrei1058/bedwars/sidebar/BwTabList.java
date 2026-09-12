@@ -538,14 +538,9 @@ public class BwTabList {
         return targetTeam.getColor().chat();
     }
 
-    /**
-     * A TAB row identifier is unique per player, but collision teams must be
-     * shared by real game-team members. Invisibility rows keep their private
-     * name-tag team and explicitly disable scoreboard collision; this is
-     * separate from the entity-level collidable flag used by projectiles.
-     */
+    /** Shared scoreboard collision group for live players on the same arena team. */
     static @Nullable String collisionGroup(@Nullable ITeam team, @NotNull Player player) {
-        return collisionGroup(team, player.hasPotionEffect(PotionEffectType.INVISIBILITY));
+        return collisionGroup(team, false);
     }
 
     static @Nullable String collisionGroup(@NotNull GameState status, @Nullable ITeam team,
@@ -555,7 +550,7 @@ public class BwTabList {
     }
 
     static @Nullable String collisionGroup(@Nullable ITeam team, boolean invisible) {
-        if (team == null || invisible) return null;
+        if (team == null) return null;
         return team.getIdentity().toString();
     }
 
@@ -568,11 +563,9 @@ public class BwTabList {
     static PlayerTab.PushingRule collisionPushingRule(@NotNull GameState status,
                                                        boolean spectator,
                                                        boolean invisible) {
-        // Visible live players in an active game join a shared collision team.
-        // Invisible rows keep a private name-tag team and use the explicit
-        // NEVER scoreboard collision rule. Waiting and starting players retain
-        // normal entity collision until the round actually begins.
-        return status == GameState.playing && !spectator && !invisible
+        // Live players in an active game join a shared collision team. Waiting
+        // and starting players retain normal collision until the round begins.
+        return status == GameState.playing && !spectator
                 ? PlayerTab.PushingRule.PUSH_OTHER_TEAMS
                 : PlayerTab.PushingRule.NEVER;
     }

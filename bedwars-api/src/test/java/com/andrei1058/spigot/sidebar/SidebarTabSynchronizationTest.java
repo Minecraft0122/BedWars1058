@@ -813,23 +813,23 @@ class SidebarTabSynchronizationTest {
     }
 
     @Test
-    void privateInvisibleRowsDisableScoreboardCollisionWithoutSharingNameTags() {
+    void invisiblePlayingRowsStillUseTheirTeamCollisionGroup() {
         Sidebar sidebar = sidebar();
         TeamState state = new TeamState();
         Scoreboard scoreboard = scoreboard(team(state));
         Player target = player("InvisibleAlice");
         PlayerTab tab = new PlayerTab(
                 "invisible-alice", target, new SidebarLine(), new SidebarLine(),
-                PlayerTab.PushingRule.NEVER, List.of(), ChatColor.RED,
+                PlayerTab.PushingRule.PUSH_OTHER_TEAMS, List.of(), ChatColor.RED,
                 PlayerTab.NameTagVisibility.NEVER, PlayerTab.PlayerListMode.ACTUAL,
                 "red-team");
 
         sidebar.applyTab(scoreboard, tab);
 
-        assertSame(Team.OptionStatus.NEVER, state.collision,
-                "an invisible private row must not restore teammate pushing");
-        assertSame(Team.OptionStatus.NEVER, state.visibility,
-                "the private row must retain hidden name-tag visibility");
+        assertSame(Team.OptionStatus.FOR_OTHER_TEAMS, state.collision,
+                "an invisible live player must still share teammate collision rules");
+        assertSame(Team.OptionStatus.ALWAYS, state.visibility,
+                "the shared collision team must remain usable by all teammates");
     }
 
     @Test
