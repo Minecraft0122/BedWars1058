@@ -88,6 +88,17 @@ class BwSidebarTest {
     }
 
     @Test
+    void arenaHeadersInsertGameIdAfterMapInformation() {
+        String gameId = "&7对局编号：&f{gameId}";
+        List<String> header = List.of("服务器", "地图：{map} 模式：{group}", "", "下一事件");
+
+        assertEquals(List.of("服务器", "地图：{map} 模式：{group}", gameId, "", "下一事件"),
+                BwSidebar.insertGameIdLine(header, gameId));
+        List<String> existing = List.of("服务器", "已有 {gameId}");
+        assertSame(existing, BwSidebar.insertGameIdLine(existing, gameId));
+    }
+
+    @Test
     void insertedGameTimeKeepsTheWidthSpacerFirst() {
         List<String> selected = BwSidebar.ensureTabWidth(BwSidebar.insertGameTimeLine(
                 List.of("地图", "{nextEvent}"), "游戏时间 {gameTime}", GameState.playing));

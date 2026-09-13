@@ -53,6 +53,7 @@ public class SimplifiedChinese extends Language {
         yml.addDefault(Messages.PREFIX, "");
         yml.addDefault("name", "简体中文");
         yml.addDefault(Messages.FORMATTING_SB_TAB_GAME_TIME, "&7游戏时间：&a{gameTime}");
+        yml.addDefault(Messages.FORMATTING_SB_TAB_GAME_ID, "&7对局编号：&f{gameId}");
 
         // this must stay here
         // move message to new path
@@ -1132,7 +1133,7 @@ public class SimplifiedChinese extends Language {
         yml.addDefault(Messages.UPGRADES_TRAP_CUSTOM_MSG + "3", "&c&l报警陷阱被{color}&l{team}的&7&l{player}&c&l触发了！");
         yml.addDefault(Messages.UPGRADES_TRAP_CUSTOM_TITLE + "3", "&c&l警报！！！");
         yml.addDefault(Messages.UPGRADES_TRAP_CUSTOM_SUBTITLE + "3", "{color}{team}&f触发了陷阱！");
-        updateToLatestVersion(19, SimplifiedChinese::migrateSchema16);
+        updateToLatestVersion(20, SimplifiedChinese::migrateSchema16);
         setPrefix(m(Messages.PREFIX));
         setPrefixStatic(m(Messages.PREFIX));
     }

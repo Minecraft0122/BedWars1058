@@ -345,6 +345,10 @@ public class BwSidebar implements ISidebar {
             providers.add(new PlaceholderProvider("{on}", () -> arenaPlayerCount(arenaContext)));
             providers.add(new PlaceholderProvider("{max}", () -> String.valueOf(arenaContext.getMaxPlayers())));
             providers.add(new PlaceholderProvider("{nextEvent}", () -> getNextEventName(arenaContext)));
+            providers.add(new PlaceholderProvider("{gameId}", () -> {
+                String gameId = arenaContext.getWorldName();
+                return gameId == null ? "" : gameId;
+            }));
             providers.add(new PlaceholderProvider("{gameTime}",
                     () -> ElapsedTimeFormatter.format(arenaContext.getStartTime())));
 
@@ -601,6 +605,8 @@ public class BwSidebar implements ISidebar {
             headerLines = selectLobbyHeader(config.getYml().getStringList(ConfigPath.SB_CONFIG_TAB_LOBBY_HEADER),
                     headerLines);
         } else {
+            headerLines = insertGameIdLine(headerLines,
+                    language.m(Messages.FORMATTING_SB_TAB_GAME_ID));
             headerLines = insertGameTimeLine(headerLines,
                     language.m(Messages.FORMATTING_SB_TAB_GAME_TIME), arena.getStatus());
             headerLines = ensureTabWidth(headerLines);
@@ -673,6 +679,37 @@ public class BwSidebar implements ISidebar {
         }
         withGameTime.add(nextEventLine < 0 ? withGameTime.size() : nextEventLine, gameTimeLine);
         return withGameTime;
+    }
+
+    static List<String> insertGameIdLine(List<String> header, String gameIdLine) {
+        if (header == null || gameIdLine == null || gameIdLine.isBlank()
+                || header.stream().anyMatch(line -> line != null && line.contains("{gameId}"))) {
+            return header;
+        }
+
+        List<String> withGameId = new ArrayList<>(header);
+        int insertionPoint = -1;
+        for (int index = 0; index < withGameId.size(); index++) {
+            String line = withGameId.get(index);
+            if (line != null && (line.contains("{map}") || line.contains("{map_name}"))) {
+                insertionPoint = index + 1;
+                break;
+            }
+        }
+        if (insertionPoint < 0) {
+            for (int index = 0; index < withGameId.size(); index++) {
+                String line = withGameId.get(index);
+                if (line != null && line.contains("{serverIp}")) {
+                    insertionPoint = index + 1;
+                    break;
+                }
+            }
+        }
+        if (insertionPoint < 0) {
+            insertionPoint = withGameId.size();
+        }
+        withGameId.add(insertionPoint, gameIdLine);
+        return withGameId;
     }
 
     static boolean shouldResynchronizeTabContext(@Nullable IArena previousArena,

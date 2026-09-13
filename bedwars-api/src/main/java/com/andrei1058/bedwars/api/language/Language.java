@@ -79,6 +79,8 @@ public class Language extends ConfigManager {
                 "&eArena resets in &c{time}&e seconds.");
         getYml().addDefault(Messages.FORMATTING_SB_TAB_GAME_TIME,
                 "&7Game time: &a{gameTime}");
+        getYml().addDefault(Messages.FORMATTING_SB_TAB_GAME_ID,
+                "&7Game ID: &f{gameId}");
 
         // replace old placeholders
         List<String> oldMsg = getYml().getStringList(Messages.GAME_END_TOP_PLAYER_CHAT);
@@ -166,6 +168,8 @@ public class Language extends ConfigManager {
                 "TAB 玩家列表的头部、底部、玩家名前缀与后缀；大厅和竞技场全部状态至少保持 128 空格宽度。");
         setComments(Messages.FORMATTING_SB_TAB_GAME_TIME,
                 "游戏进行时插入 TAB 页首的本局已进行时间；必须保留 {gameTime}，留空可隐藏该行。");
+        setComments(Messages.FORMATTING_SB_TAB_GAME_ID,
+                "竞技场 TAB 页首显示本局对局编号；必须保留 {gameId}，留空可隐藏该行。");
         setComments(Messages.SCOREBOARD_LOBBY, "主大厅计分板文本列表。");
         setComments(Messages.SCOREBOARD_DEFAULT_WAITING, "默认分组等待阶段计分板文本列表。");
         setComments(Messages.SCOREBOARD_DEFAULT_PLAYING, "默认分组游戏阶段计分板文本列表。");

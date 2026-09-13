@@ -8,7 +8,7 @@ Maven：
 <dependency>
     <groupId>com.simpmc.bedwars</groupId>
     <artifactId>simpmc-bedwars-api</artifactId>
-    <version>5.4.6</version>
+    <version>5.5.0</version>
     <scope>provided</scope>
 </dependency>
 ```
@@ -103,7 +103,7 @@ TAB 队伍色由每个查看者的 scoreboard Team 同时控制 TAB 和头顶名
 
 7.1.0 新增 `PlayerTab.PlayerListMode`。`ACTUAL` 保留目标当前真实模式；`SPECTATOR` 只向其他查看者发送 `UPDATE_GAME_MODE=SPECTATOR`，不会调用 `Player#setGameMode`，适合需要保留 ADVENTURE 交互的自定义旁观行。7.1.1 起，当目标就是 Sidebar 持有者本人时始终保留 Paper 当前真实模式；旧版本缓存过的本人伪模式会立即恢复，避免客户端移动模式与服务器分叉。旧构造器和旧 `Sidebar#playerTabCreate` 重载默认使用 `ACTUAL`；可通过带 `PlayerListMode` 的新重载创建，或对已有行调用 `setPlayerListMode`。Sidebar 释放、被覆盖或删除该行时会从 Paper 当前状态恢复真实模式和第三方 nullable 名称。
 
-游戏进行中的 TAB 页首使用 `{gameTime}` 显示从 `IArena#getStartTime()` 计算的本局已进行时间；`{time}` 仍是下一事件倒计时。附属插件若直接使用 PlaceholderAPI，可读取 `%bw1058_elapsed_time%`，其格式与 TAB 一致：不足一小时为 `MM:SS`，一小时以上为 `HH:MM:SS`。开始时间缺失时返回空文本。
+游戏进行中的 TAB 页首使用 `{gameId}` 显示 `IArena#getWorldName()` 对应的本局对局编号，使用 `{gameTime}` 显示从 `IArena#getStartTime()` 计算的本局已进行时间；`{time}` 仍是下一事件倒计时。附属插件若直接使用 PlaceholderAPI，可读取 `%bw1058_elapsed_time%`，其格式与 TAB 一致：不足一小时为 `MM:SS`，一小时以上为 `HH:MM:SS`。开始时间缺失时返回空文本。
 
 ## 配置 API
 

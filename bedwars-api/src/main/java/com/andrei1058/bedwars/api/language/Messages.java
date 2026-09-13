@@ -190,6 +190,7 @@ public class Messages {
     // TAB
     public static String FORMATTING_SB_TAB_BASE = "format-tab";
     public static String FORMATTING_SB_TAB_GAME_TIME = FORMATTING_SB_TAB_BASE + ".playing.game-time";
+    public static String FORMATTING_SB_TAB_GAME_ID = FORMATTING_SB_TAB_BASE + ".game-id";
 
     // TAB LOBBY
     public static String FORMATTING_SB_TAB_LOBBY_HEADER = FORMATTING_SB_TAB_BASE + ".lobby.header";

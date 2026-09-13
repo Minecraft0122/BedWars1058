@@ -46,6 +46,22 @@ class SimplifiedChineseMigrationTest {
     }
 
     @Test
+    void schemaTwentyPersistsTheMissingGameIdDefault() {
+        YamlConfiguration defaults = new YamlConfiguration();
+        defaults.set(Messages.FORMATTING_SB_TAB_GAME_ID, "&7对局编号：&f{gameId}");
+        YamlConfiguration language = new YamlConfiguration();
+        language.setDefaults(defaults);
+        language.set(ConfigManager.CONFIG_VERSION_PATH, 19);
+
+        assertTrue(ConfigManager.applyVersionedMigration(language, 20,
+                SimplifiedChinese::migrateSchema16));
+
+        assertEquals("&7对局编号：&f{gameId}",
+                language.getString(Messages.FORMATTING_SB_TAB_GAME_ID));
+        assertEquals(20, language.getInt(ConfigManager.CONFIG_VERSION_PATH));
+    }
+
+    @Test
     void arenaTabKeepsUpstreamWidthWhileLobbyIsWider() {
         assertEquals(104, SimplifiedChinese.ORIGINAL_TAB_WIDTH);
         assertEquals(104, SimplifiedChinese.ORIGINAL_TAB_WIDTH_SPACER.length());
