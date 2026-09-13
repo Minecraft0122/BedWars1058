@@ -63,6 +63,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.logging.Level;
 
 import static com.andrei1058.bedwars.BedWars.*;
 import static com.andrei1058.bedwars.api.language.Language.getMsg;
@@ -183,7 +184,7 @@ public class BedWarsTeam implements ITeam {
         p.setCanPickupItems(true);
         // Keep the entity collidable so projectiles can still resolve a hit.
         // Teammate pushing is disabled by the playing scoreboard team below.
-        nms.setCollide(p, getArena(), true);
+        p.setCollidable(true);
         sendDefaultInventory(p, true);
         Bukkit.getPluginManager().callEvent(new PlayerFirstSpawnEvent(p, getArena(), this));
     }
@@ -297,7 +298,10 @@ public class BedWarsTeam implements ITeam {
                     } else {
                         p.getInventory().addItem(i);
                     }
-                } catch (Exception ignored) {
+                } catch (Exception exception) {
+                    plugin.getLogger().log(Level.WARNING,
+                            "无法为玩家 " + (p == null ? "<null>" : p.getName())
+                                    + " 加载默认物品配置：" + s, exception);
                 }
             }
         }
@@ -348,7 +352,10 @@ public class BedWarsTeam implements ITeam {
                         p.getInventory().addItem(i);
                         break;
                     }
-                } catch (Exception ignored) {
+                } catch (Exception exception) {
+                    plugin.getLogger().log(Level.WARNING,
+                            "无法为玩家 " + (p == null ? "<null>" : p.getName())
+                                    + " 加载默认武器配置：" + s, exception);
                 }
             }
         }
@@ -392,7 +399,7 @@ public class BedWarsTeam implements ITeam {
         // respawning entity block players while the async teleport is pending.
         java.util.concurrent.CompletableFuture<Boolean> spawnTeleport =
                 SafeSpawnResolver.teleportResult(p, getSpawn());
-        nms.setCollide(p, arena, false);
+        p.setCollidable(false);
         p.setVelocity(new Vector(0, 0, 0));
         p.setAllowFlight(false);
         p.setFlying(false);
@@ -413,7 +420,7 @@ public class BedWarsTeam implements ITeam {
                     || getArena().isSpectator(p) || getArena().isReSpawning(p)) {
                 return;
             }
-            nms.setCollide(p, arena, true);
+            p.setCollidable(true);
         }));
         p.setHealth(20);
 

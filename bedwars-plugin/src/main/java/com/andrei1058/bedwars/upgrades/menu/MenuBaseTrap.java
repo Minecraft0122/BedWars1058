@@ -121,7 +121,7 @@ public class MenuBaseTrap implements MenuContent, EnemyBaseEnterTrap, TeamUpgrad
                     try {
                         amp = Integer.parseInt(data[1]);
                         time = Integer.parseInt(data[2]);
-                    } catch (Exception ignored) {
+                    } catch (NumberFormatException ignored) {
                     }
                     ua = new PlayerEffectAction(pe, amp, time, applyType);
                     break;

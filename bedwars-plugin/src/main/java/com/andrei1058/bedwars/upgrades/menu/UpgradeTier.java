@@ -91,7 +91,7 @@ public class UpgradeTier {
                     int amplifier = 1;
                     try {
                         amplifier = Integer.parseInt(data[1]);
-                    } catch (Exception ignored) {
+                    } catch (NumberFormatException ignored) {
                     }
                     ua = new EnchantItemAction(e, amplifier, apply);
                     break;
@@ -122,7 +122,7 @@ public class UpgradeTier {
                     try {
                         amp = Integer.parseInt(data[1]);
                         time = Integer.parseInt(data[2]);
-                    } catch (Exception ignored) {
+                    } catch (NumberFormatException ignored) {
                     }
                     ua = new PlayerEffectAction(pe, amp, time, applyType);
                     break;

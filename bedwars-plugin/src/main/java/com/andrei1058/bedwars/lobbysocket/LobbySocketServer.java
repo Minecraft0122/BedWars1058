@@ -449,8 +449,9 @@ public final class LobbySocketServer implements AutoCloseable {
 
     private static int intValue(JsonObject json, String key, int fallback) {
         try {
-            return json.has(key) ? json.get(key).getAsInt() : fallback;
-        } catch (RuntimeException ignored) {
+            JsonElement value = json == null ? null : json.get(key);
+            return value == null || value.isJsonNull() ? fallback : value.getAsInt();
+        } catch (NumberFormatException | UnsupportedOperationException | IllegalStateException ignored) {
             return fallback;
         }
     }
@@ -461,16 +462,18 @@ public final class LobbySocketServer implements AutoCloseable {
 
     private static long longValue(JsonObject json, String key, long fallback) {
         try {
-            return json.has(key) ? json.get(key).getAsLong() : fallback;
-        } catch (RuntimeException ignored) {
+            JsonElement value = json == null ? null : json.get(key);
+            return value == null || value.isJsonNull() ? fallback : value.getAsLong();
+        } catch (NumberFormatException | UnsupportedOperationException | IllegalStateException ignored) {
             return fallback;
         }
     }
 
     private static boolean booleanValue(JsonObject json, String key, boolean fallback) {
         try {
-            return json.has(key) ? json.get(key).getAsBoolean() : fallback;
-        } catch (RuntimeException ignored) {
+            JsonElement value = json == null ? null : json.get(key);
+            return value == null || value.isJsonNull() ? fallback : value.getAsBoolean();
+        } catch (NumberFormatException | UnsupportedOperationException | IllegalStateException ignored) {
             return fallback;
         }
     }

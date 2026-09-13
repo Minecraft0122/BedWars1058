@@ -523,7 +523,7 @@ public class Arena implements IArena {
             setArenaByPlayer(p, this);
             // Waiting and starting players keep normal entity collision. This
             // also clears the disabled flag left by an earlier respawn.
-            nms.setCollide(p, this, true);
+            p.setCollidable(true);
             InvisibilityManager.synchronizeViewer(this, p);
             LobbyAnnouncements.playerEnteredArena(p);
             PlayerMotion.disableFlight(p);
@@ -628,8 +628,6 @@ public class Arena implements IArena {
             spectators.add(p);
             players.remove(p);
 
-            updateSpectatorCollideRule(p, false);
-
             if (!playerBefore) {
                 /* save player inv etc if isn't saved yet*/
                 if (getServerType() != ServerType.BUNGEE) {
@@ -643,7 +641,7 @@ public class Arena implements IArena {
 
             SidebarService sidebarService = SidebarService.getInstance();
             if (!playerBefore) sidebarService.giveSidebar(p, this, false);
-            nms.setCollide(p, this, false);
+            p.setCollidable(false);
             if (!playerBefore) {
                 if (staffTeleport == null) {
                     TeleportManager.teleportC(p, getSpectatorLocation(), PlayerTeleportEvent.TeleportCause.PLUGIN);
@@ -784,7 +782,7 @@ public class Arena implements IArena {
         if (wasRespawning) InvisibilityManager.showRespawningPlayer(this, p);
         // A player may leave while waiting for a respawn. Restore the entity
         // flag before the arena association is removed.
-        nms.setCollide(p, this, true);
+        p.setCollidable(true);
         if (status == GameState.playing) {
             for (ITeam t : getTeams()) {
                 if (t.isMember(p)) {
@@ -1029,7 +1027,7 @@ public class Arena implements IArena {
         p.getInventory().clear();
         p.getInventory().setArmorContents(null);
         InvisibilityManager.remove(this, p);
-        nms.setCollide(p, this, true);
+        p.setCollidable(true);
         Arena.afkCheck.remove(p.getUniqueId());
         BedWars.getAPI().getAFKUtil().setPlayerAFK(p, false);
 
@@ -1894,7 +1892,7 @@ public class Arena implements IArena {
                 p.getInventory().setItem(item.slot(), stack);
             } catch (RuntimeException exception) {
                 warnLobbyItemProblem("build:" + item.id(), "无法创建大厅物品 " + item.id()
-                        + "，已跳过该物品：" + exception.getMessage());
+                        + "，已跳过该物品：" + exception.getMessage(), exception);
             }
         }
     }
@@ -2004,6 +2002,12 @@ public class Arena implements IArena {
 
     private static void warnLobbyItemProblem(String key, String message) {
         if (warnedLobbyItemProblems.add(key)) plugin.getLogger().warning(message);
+    }
+
+    private static void warnLobbyItemProblem(String key, String message, Throwable exception) {
+        if (warnedLobbyItemProblems.add(key)) {
+            plugin.getLogger().log(Level.WARNING, message, exception);
+        }
     }
 
     private record LobbyCommandItem(String id, Material material, byte data, boolean enchanted,
@@ -2687,7 +2691,7 @@ public class Arena implements IArena {
                 InvisibilityManager.remove(this, player);
             }
             if (respawning) InvisibilityManager.showRespawningPlayer(this, player);
-            nms.setCollide(player, this, true);
+            player.setCollidable(true);
         }
         for (ITeam bwt : new ArrayList<>(teams)) {
             bwt.destroyData();
@@ -2820,15 +2824,14 @@ public class Arena implements IArena {
                 // death entity is still at the respawn event location, and a
                 // deferred collision update leaves it able to push players
                 // until the next scheduler turn.
-                nms.setCollide(player, this, false);
+                player.setCollidable(false);
                 InvisibilityManager.hideRespawningPlayer(this, player);
                 Bukkit.getScheduler().runTaskLater(BedWars.plugin, () -> {
                     if (!player.isOnline() || !respawnSessions.containsKey(player)) return;
                     PlayerMotion.enableFlight(player);
-                    nms.setCollide(player, this, false);
+                    player.setCollidable(false);
                     InvisibilityManager.synchronizePlayerEquipment(this, player);
                     InvisibilityManager.synchronizeViewer(this, player);
-                    updateSpectatorCollideRule(player, false);
                 }, 10L);
             } else {
                 ITeam team = getTeam(player);

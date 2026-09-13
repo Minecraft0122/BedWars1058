@@ -333,7 +333,7 @@ public class DamageDeathMove implements Listener {
         // living players. The normal respawn/spectator paths restore or keep
         // this flag as appropriate.
         if (a != null && a.getStatus() == GameState.playing && a.isPlayer(victim)) {
-            BedWars.nms.setCollide(victim, a, false);
+            victim.setCollidable(false);
             InvisibilityManager.hideRespawningPlayer(a, victim);
         }
         if ((BedWars.getServerType() == ServerType.MULTIARENA && BedWars.getLobbyWorld().equals(e.getEntity().getWorld().getName())) || a != null) {

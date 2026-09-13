@@ -69,7 +69,7 @@ public class ArenaList extends SubCommand {
                 if (page < 0) {
                     page = 1;
                 }
-            } catch (Exception ignored) {
+            } catch (NumberFormatException ignored) {
             }
         }
         int start = (page - 1) * ARENAS_PER_PAGE;
