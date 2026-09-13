@@ -229,6 +229,25 @@ class SimplifiedChineseMigrationTest {
     }
 
     @Test
+    void migratesLegacyTrackingMessageAndPreservesCustomValues() {
+        YamlConfiguration builtIn = new YamlConfiguration();
+        builtIn.set(Messages.FORMATTING_ACTION_BAR_TRACKING,
+                "&f正在追踪：{team} &f- 距离：{distance}m");
+
+        SimplifiedChinese.migrateTrackingMessage(builtIn);
+
+        assertEquals("&f正在追踪：{player} &f- 距离：{distance}m",
+                builtIn.getString(Messages.FORMATTING_ACTION_BAR_TRACKING));
+
+        YamlConfiguration custom = new YamlConfiguration();
+        custom.set(Messages.FORMATTING_ACTION_BAR_TRACKING, "&b自定义追踪");
+        SimplifiedChinese.migrateTrackingMessage(custom);
+
+        assertEquals("&b自定义追踪",
+                custom.getString(Messages.FORMATTING_ACTION_BAR_TRACKING));
+    }
+
+    @Test
     void addsArenaInviteToTheUnchangedBuiltInCommandHelp() {
         YamlConfiguration language = new YamlConfiguration();
         language.set(Messages.COMMAND_MAIN, List.of("", "&2▪ &7/bw stats", "&2▪ &7/bw join &o<游戏/模式>",

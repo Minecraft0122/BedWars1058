@@ -2820,6 +2820,7 @@ public class Arena implements IArena {
                 // location (team home for void deaths, death position otherwise).
                 PlayerMotion.enableFlight(player);
                 respawnSessions.put(player, seconds);
+                SidebarService.getInstance().handleRespawnState(this, player);
                 // Do this in the same tick as the session creation. The old
                 // death entity is still at the respawn event location, and a
                 // deferred collision update leaves it able to push players

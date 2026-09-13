@@ -584,6 +584,13 @@ public class SidebarService implements ISidebarService {
         });
     }
 
+    public void handleRespawnState(IArena arena, Player player) {
+        if (sidebarHandler == null || sidebars.isEmpty()) return;
+        this.sidebars.forEach((k, v) -> {
+            if (v.getArena() == arena) v.giveUpdateTabFormat(player, false);
+        });
+    }
+
     public void handleJoin(IArena arena, Player player, @Nullable Boolean spectator) {
         if (sidebarHandler == null || sidebars.isEmpty()) return;
         updateArenaPlayerTabs(sidebars.values(), arena, player, spectator);

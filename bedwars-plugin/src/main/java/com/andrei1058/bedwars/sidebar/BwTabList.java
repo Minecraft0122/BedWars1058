@@ -97,7 +97,6 @@ public class BwTabList {
         }
 
         sidebar.getArena().getPlayers().forEach(playing -> desiredPlayers.put(playing.getUniqueId(), playing));
-        sidebar.getArena().getSpectators().forEach(spectating -> desiredPlayers.put(spectating.getUniqueId(), spectating));
         synchronizeTabs(desiredPlayers, fullFormatting);
     }
 
@@ -232,68 +231,7 @@ public class BwTabList {
         // in-game tab has a special treatment
         if (arena.isSpectator(player) || (spectator != null && spectator)) {
             handle.clearPlayerHealth(player);
-
-            // if has been eliminated from a team
-            ITeam exTeam = arena.getExTeam(player.getUniqueId());
-
-            // when player leaves but decides to join to spectate later
-            if (null != exTeam) {
-
-                HashMap<String, String> replacements = getTeamReplacements(exTeam);
-
-                if (arena.getStatus() == GameState.restarting && null != arena.getWinner()) {
-                    if (arena.getWinner().equals(exTeam)) {
-                        prefix = getPlayerRowText(Messages.FORMATTING_SB_TAB_RESTARTING_WIN2_PREFIX, player, replacements);
-                        suffix = getPlayerRowText(Messages.FORMATTING_SB_TAB_RESTARTING_WIN2_SUFFIX, player, replacements);
-                    } else {
-                        prefix = getPlayerRowText(Messages.FORMATTING_SB_TAB_RESTARTING_ELM_PREFIX, player, replacements);
-                        suffix = getPlayerRowText(Messages.FORMATTING_SB_TAB_RESTARTING_ELM_SUFFIX, player, replacements);
-                    }
-                } else {
-                    prefix = getPlayerRowText(Messages.FORMATTING_SB_TAB_PLAYING_ELM_PREFIX, player, replacements);
-                    suffix = getPlayerRowText(Messages.FORMATTING_SB_TAB_PLAYING_ELM_SUFFIX, player, replacements);
-                }
-
-                prepareTabFallback(player, getPlayerListColor(exTeam));
-                PlayerTab tab = handle.playerTabCreate(
-                        playerTabId,
-                        player, prefix, suffix, PlayerTab.PushingRule.NEVER,
-                        this.sidebar.getPlaceholders(player), getPlayerListColor(exTeam),
-                        PlayerTab.NameTagVisibility.ALWAYS, PlayerTab.PlayerListMode.SPECTATOR
-                );
-                deployTab(tab, getPlayerListColor(exTeam));
-                return;
-            }
-
-            switch (arena.getStatus()) {
-                case waiting:
-                    prefix = getPlayerRowText(Messages.FORMATTING_SB_TAB_WAITING_PREFIX_SPEC, player, null);
-                    suffix = getPlayerRowText(Messages.FORMATTING_SB_TAB_WAITING_SUFFIX_SPEC, player, null);
-                    break;
-                case starting:
-                    prefix = getPlayerRowText(Messages.FORMATTING_SB_TAB_STARTING_PREFIX_SPEC, player, null);
-                    suffix = getPlayerRowText(Messages.FORMATTING_SB_TAB_STARTING_SUFFIX_SPEC, player, null);
-                    break;
-                case playing:
-                    prefix = getPlayerRowText(Messages.FORMATTING_SB_TAB_PLAYING_SPEC_PREFIX, player, null);
-                    suffix = getPlayerRowText(Messages.FORMATTING_SB_TAB_PLAYING_SPEC_SUFFIX, player, null);
-                    break;
-                case restarting:
-                    prefix = getPlayerRowText(Messages.FORMATTING_SB_TAB_RESTARTING_SPEC_PREFIX, player, null);
-                    suffix = getPlayerRowText(Messages.FORMATTING_SB_TAB_RESTARTING_SPEC_SUFFIX, player, null);
-                    break;
-                default:
-                    throw new RuntimeException("Unhandled game state..");
-            }
-
-            prepareTabFallback(player, null);
-            PlayerTab tab = handle.playerTabCreate(
-                    playerTabId,
-                    player, prefix, suffix, PlayerTab.PushingRule.NEVER,
-                    this.sidebar.getPlaceholders(player), ChatColor.WHITE,
-                    PlayerTab.NameTagVisibility.ALWAYS, PlayerTab.PlayerListMode.SPECTATOR
-            );
-            deployTab(tab, null);
+            removeDeployedTab(player.getUniqueId());
             return;
         }
 
@@ -352,6 +290,7 @@ public class BwTabList {
                         : PlayerTab.NameTagVisibility.ALWAYS,
                 PlayerTab.PlayerListMode.ACTUAL, collisionGroup(status, team, player)
         );
+        teamTab.setItalic(arena.isReSpawning(player));
         deployTab(teamTab, fallbackColor);
     }
 
@@ -396,6 +335,7 @@ public class BwTabList {
                         : PlayerTab.NameTagVisibility.ALWAYS,
                 playerListMode, spectator ? null : collisionGroup(status, team, player)
         );
+        tab.setItalic(!spectator && arena.isReSpawning(player));
         deployTab(tab, fallbackColor);
     }
 
@@ -595,17 +535,6 @@ public class BwTabList {
                 members.add(player);
             }
         }
-        for (Player player : arena.getSpectators()) {
-            if (!seenPlayers.add(player.getUniqueId())) continue;
-            ITeam formerTeam = resolvePlayerListTeam(arena, player);
-            List<Player> members = formerTeam == null ? null : teamMembers.get(formerTeam.getIdentity());
-            if (members == null) {
-                unassigned.add(player);
-            } else {
-                members.add(player);
-            }
-        }
-
         List<Player> ordered = new ArrayList<>(seenPlayers.size());
         appendSortedGroups(ordered, teamMembers.values());
         unassigned.sort(PLAYER_NAME_ORDER);

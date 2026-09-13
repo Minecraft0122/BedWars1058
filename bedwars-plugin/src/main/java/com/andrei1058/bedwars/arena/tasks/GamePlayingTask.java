@@ -27,6 +27,7 @@ import com.andrei1058.bedwars.api.arena.generator.IGenerator;
 import com.andrei1058.bedwars.api.arena.team.ITeam;
 import com.andrei1058.bedwars.api.configuration.ConfigPath;
 import com.andrei1058.bedwars.arena.InvisibilityManager;
+import com.andrei1058.bedwars.arena.feature.EnemyTrackerCompass;
 import com.andrei1058.bedwars.api.language.Language;
 import com.andrei1058.bedwars.api.language.Messages;
 import com.andrei1058.bedwars.api.util.AdventureText;
@@ -166,21 +167,18 @@ public class GamePlayingTask implements Runnable, PlayingTask {
                 }
                 break;
         }
-        int distance = 0;
         for (ITeam t : getArena().getTeams()) {
-            if (t.getSize() > 1) {
-                for (Player p : t.getMembers()) {
-                    for (Player p2 : t.getMembers()) {
-                        if (p2 == p) continue;
-                        if (distance == 0) {
-                            distance = (int) p.getLocation().distance(p2.getLocation());
-                        } else if ((int) p.getLocation().distance(p2.getLocation()) < distance) {
-                            distance = (int) p.getLocation().distance(p2.getLocation());
-                        }
-                    }
-                    nms.playAction(p, AdventureText.ampersand(getMsg(p, Messages.FORMATTING_ACTION_BAR_TRACKING).replace("{team}", t.getColor().chat() + t.getDisplayName(Language.getPlayerLanguage(p)))
-                            .replace("{distance}", t.getColor().chat().toString() + distance)));
-                }
+            for (Player p : t.getMembers()) {
+                Player tracked = EnemyTrackerCompass.getTrackedTarget(p);
+                if (tracked == null) continue;
+                ITeam trackedTeam = getArena().getTeam(tracked);
+                if (trackedTeam == null) continue;
+                String trackedColor = trackedTeam.getColor().chat().toString();
+                int distance = (int) p.getLocation().distance(tracked.getLocation());
+                nms.playAction(p, AdventureText.ampersand(getMsg(p, Messages.FORMATTING_ACTION_BAR_TRACKING)
+                        .replace("{player}", trackedColor + tracked.getName())
+                        .replace("{team}", trackedColor + trackedTeam.getDisplayName(Language.getPlayerLanguage(p)))
+                        .replace("{distance}", trackedColor + distance)));
             }
 
             // spawn items

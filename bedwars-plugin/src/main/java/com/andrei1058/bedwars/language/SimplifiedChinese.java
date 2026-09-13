@@ -196,7 +196,7 @@ public class SimplifiedChinese extends Language {
         yml.addDefault(Messages.FORMATTING_SCOREBOARD_TEAM_ALIVE, "&a&l✓");
         yml.addDefault(Messages.FORMATTING_SCOREBOARD_NEXEVENT_TIMER, "mm:ss");
         yml.addDefault(Messages.FORMATTING_SCOREBOARD_YOUR_TEAM, "&7 你");
-        yml.addDefault(Messages.FORMATTING_ACTION_BAR_TRACKING, "&f正在追踪：{team} &f- 距离：{distance}m");
+        yml.addDefault(Messages.FORMATTING_ACTION_BAR_TRACKING, "&f正在追踪：{player} &f- 距离：{distance}m");
         yml.addDefault(Messages.FORMATTING_TEAM_WINNER_FORMAT, "      {TeamColor}{TeamName} &7- {members}");
         yml.addDefault(Messages.FORMATTING_SOLO_WINNER_FORMAT, "                 {TeamColor}{TeamName} &7- {members}");
         yml.addDefault(Messages.FORMATTING_GENERATOR_TIER1, "I");
@@ -1141,6 +1141,7 @@ public class SimplifiedChinese extends Language {
         if (yml.getInt(CONFIG_VERSION_PATH, 0) < 14) {
             migrateLegacyMessages(yml);
         }
+        migrateTrackingMessage(yml);
         Language.migrateBuiltInTabPlayerRows(yml);
     }
 
@@ -1179,6 +1180,12 @@ public class SimplifiedChinese extends Language {
                 List.of("", "&f你正在为 {teamColor}{teamName}队 &f而战", "&a{serverIp}", "&f由 {poweredBy} 提供支持", ""),
                 List.of("", "&f你属于 {teamColor}{teamName}队", "&a{serverIp}", "&f由 {poweredBy} 提供支持", ""));
         Language.migrateBuiltInTabPlayerRows(yml);
+    }
+
+    static void migrateTrackingMessage(YamlConfiguration yml) {
+        replaceIfEqual(yml, Messages.FORMATTING_ACTION_BAR_TRACKING,
+                "&f正在追踪：{team} &f- 距离：{distance}m",
+                "&f正在追踪：{player} &f- 距离：{distance}m");
     }
 
     static void migrateEliminatedTabFormat(YamlConfiguration yml) {

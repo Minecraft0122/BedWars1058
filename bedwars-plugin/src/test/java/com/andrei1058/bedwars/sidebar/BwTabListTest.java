@@ -152,7 +152,7 @@ class BwTabListTest {
         );
 
         assertEquals(
-                List.of("Aaron", "Alice", "Bob", "Adam", "charlie", "Viewer"),
+                List.of("Alice", "Bob", "Adam", "charlie"),
                 BwTabList.orderedArenaPlayers(arena).stream().map(Player::getName).toList()
         );
     }

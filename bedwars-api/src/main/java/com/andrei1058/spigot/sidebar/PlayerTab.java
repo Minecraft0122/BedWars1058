@@ -42,6 +42,7 @@ public class PlayerTab {
     private NameTagVisibility nameTagVisibility = NameTagVisibility.ALWAYS;
     private PlayerListMode playerListMode = PlayerListMode.ACTUAL;
     private ChatColor color = ChatColor.WHITE;
+    private boolean italic;
     private Consumer<PlayerTab> updateCallback = tab -> {
     };
 
@@ -136,6 +137,16 @@ public class PlayerTab {
         if (this.color == color) return;
         this.color = color;
         updateCallback.accept(this);
+    }
+
+    public void setItalic(boolean italic) {
+        if (this.italic == italic) return;
+        this.italic = italic;
+        updateCallback.accept(this);
+    }
+
+    public boolean isItalic() {
+        return italic;
     }
 
     @NotNull

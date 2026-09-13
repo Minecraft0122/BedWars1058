@@ -5,6 +5,7 @@ import io.papermc.paper.scoreboard.numbers.FixedFormat;
 import io.papermc.paper.scoreboard.numbers.NumberFormat;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -945,8 +946,10 @@ public class Sidebar {
     private static @NotNull RenderedPlayerTab renderPlayerTab(@NotNull PlayerTab tab) {
         String prefix = renderText(tab.getPrefix(), tab.getPlaceholders());
         String suffix = renderText(tab.getSuffix(), tab.getPlaceholders());
+        Component playerName = Component.text(tab.getPlayer().getName()).color(tab.getTextColor());
+        if (tab.isItalic()) playerName = playerName.decorate(TextDecoration.ITALIC);
         Component displayName = component(prefix)
-                .append(Component.text(tab.getPlayer().getName()).color(tab.getTextColor()))
+                .append(playerName)
                 .append(component(suffix));
         return new RenderedPlayerTab(tab, prefix, suffix,
                 LEGACY.serialize(displayName));

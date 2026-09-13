@@ -23,7 +23,12 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.potion.PotionEffectType;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 public final class EnemyTrackerCompass implements Runnable {
 
@@ -31,8 +36,15 @@ public final class EnemyTrackerCompass implements Runnable {
     private static final int HOTBAR_SLOT = 8;
     private static final double IDLE_TARGET_RADIUS = 16.0;
     private static final double IDLE_SPIN_STEP = Math.PI / 5.0;
+    private static final Map<UUID, Player> trackedTargets = new HashMap<>();
 
     private double idleAngle;
+
+    public static Player getTrackedTarget(Player player) {
+        if (player == null) return null;
+        Player target = trackedTargets.get(player.getUniqueId());
+        return target != null && target.isOnline() ? target : null;
+    }
 
     public static void giveTo(Player player) {
         if (player == null) return;
@@ -75,12 +87,14 @@ public final class EnemyTrackerCompass implements Runnable {
             idleAngle -= Math.PI * 2.0;
         }
 
+        Set<UUID> currentTrackers = new HashSet<>();
         for (IArena arena : new ArrayList<>(Arena.getArenas())) {
-            updateArena(arena);
+            updateArena(arena, currentTrackers);
         }
+        trackedTargets.keySet().removeIf(uuid -> !currentTrackers.contains(uuid));
     }
 
-    private void updateArena(IArena arena) {
+    private void updateArena(IArena arena, Set<UUID> currentTrackers) {
         if (arena == null || arena.getStatus() != GameState.playing) return;
 
         List<Player> arenaPlayers = arena.getPlayers();
@@ -95,11 +109,14 @@ public final class EnemyTrackerCompass implements Runnable {
         for (TrackedPlayer trackedPlayer : activePlayers) {
             Player player = trackedPlayer.player();
             if (!hasTrackingCompass(player)) continue;
+            currentTrackers.add(player.getUniqueId());
 
             TrackedPlayer nearestEnemy = findNearestEnemy(arena, activePlayers, trackedPlayer);
             if (nearestEnemy == null) {
+                trackedTargets.remove(player.getUniqueId());
                 player.setCompassTarget(createIdleTarget(player));
             } else {
+                trackedTargets.put(player.getUniqueId(), nearestEnemy.player());
                 player.setCompassTarget(nearestEnemy.location());
             }
         }

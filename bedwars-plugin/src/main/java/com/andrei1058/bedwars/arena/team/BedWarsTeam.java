@@ -43,6 +43,7 @@ import com.andrei1058.bedwars.arena.NpcFacing;
 import com.andrei1058.bedwars.arena.OreGenerator;
 import com.andrei1058.bedwars.arena.SafeSpawnResolver;
 import com.andrei1058.bedwars.arena.feature.EnemyTrackerCompass;
+import com.andrei1058.bedwars.sidebar.SidebarService;
 import com.andrei1058.bedwars.configuration.Sounds;
 import com.andrei1058.bedwars.shop.ShopCache;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -392,7 +393,7 @@ public class BedWarsTeam implements ITeam {
         } else {
             reSpawnInvulnerability.put(p.getUniqueId(), System.currentTimeMillis() + config.getInt(ConfigPath.GENERAL_CONFIGURATION_RE_SPAWN_INVULNERABILITY));
         }
-        p.setCanPickupItems(true);
+        p.setCanPickupItems(false);
         // Paper's performance path may complete this teleport asynchronously.
         // Keep the player non-collidable until the old death location is no
         // longer occupied; restoring collision immediately would let the
@@ -420,8 +421,10 @@ public class BedWarsTeam implements ITeam {
                     || getArena().isSpectator(p) || getArena().isReSpawning(p)) {
                 return;
             }
+            p.setCanPickupItems(true);
             p.setCollidable(true);
         }));
+        SidebarService.getInstance().handleRespawnState(getArena(), p);
         p.setHealth(20);
 
         nms.sendTitle(p, AdventureText.section(getMsg(p, Messages.PLAYER_DIE_RESPAWNED_TITLE)), Component.empty(), 0, 20, 10);

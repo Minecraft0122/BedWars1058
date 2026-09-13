@@ -141,6 +141,23 @@ class SidebarTabSynchronizationTest {
     }
 
     @Test
+    void rendersRespawningPlayerNamesInItalic() {
+        RecordingRenderer renderer = new RecordingRenderer();
+        Sidebar sidebar = sidebar(renderer);
+        Player viewer = player("Viewer");
+        Player target = player("RespawningAlice");
+        PlayerTab tab = new PlayerTab("respawning-alice", target,
+                new SidebarLine("§7[§cR§7] "), new SidebarLine(),
+                PlayerTab.PushingRule.NEVER, List.of(), ChatColor.RED,
+                PlayerTab.NameTagVisibility.ALWAYS);
+        tab.setItalic(true);
+
+        sidebar.renderPlayerListName(viewer, tab);
+
+        assertEquals("§7[§cR§7] §c§oRespawningAlice", renderer.rendered.getFirst().displayName());
+    }
+
+    @Test
     void spectatorRowsKeepTheirScoreboardColorAndOnlyAdvertiseClientSpectatorMode() {
         RecordingRenderer renderer = new RecordingRenderer();
         Sidebar sidebar = sidebar(renderer);
