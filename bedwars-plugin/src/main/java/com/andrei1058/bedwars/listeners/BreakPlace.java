@@ -82,6 +82,7 @@ import static com.andrei1058.bedwars.api.language.Language.getMsg;
 
 public class BreakPlace implements Listener {
 
+    static final int SHEARS_BREAK_COOLDOWN_TICKS = 10;
     private static final Set<UUID> BUILD_SESSIONS = new HashSet<>();
     private final boolean allowFireBreak;
     private final BlastProtectionUtil blastProtection;
@@ -266,6 +267,23 @@ public class BreakPlace implements Listener {
         Material material = event.getEntity().getItemStack().getType();
         if (nms.isBed(material) || material.toString().equalsIgnoreCase("SEEDS") || material.toString().equalsIgnoreCase("WHEAT_SEEDS")) {
             event.setCancelled(true);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onShearsBlockBreak(@NotNull BlockBreakEvent event) {
+        Player player = event.getPlayer();
+        IArena arena = Arena.getArenaByPlayer(player);
+        if (arena == null || arena.getStatus() != GameState.playing
+                || !arena.isPlayer(player) || arena.isSpectator(player)
+                || arena.getRespawnSessions().containsKey(player)
+                || !isWool(event.getBlock().getType())) {
+            return;
+        }
+
+        ItemStack heldItem = nms.getItemInHand(player);
+        if (heldItem != null && heldItem.getType() == Material.SHEARS) {
+            player.setCooldown(Material.SHEARS, SHEARS_BREAK_COOLDOWN_TICKS);
         }
     }
 
@@ -771,5 +789,10 @@ public class BreakPlace implements Listener {
 
     private static boolean isFire(Material material) {
         return material == Material.FIRE || material == Material.SOUL_FIRE;
+    }
+
+    static boolean isWool(@NotNull Material material) {
+        String name = material.name();
+        return "WOOL".equals(name) || name.endsWith("_WOOL");
     }
 }

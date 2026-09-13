@@ -85,6 +85,14 @@ class BreakPlaceTest {
     }
 
     @Test
+    void shearsCooldownIsHalfASecond() {
+        assertEquals(10, BreakPlace.SHEARS_BREAK_COOLDOWN_TICKS);
+        assertTrue(BreakPlace.isWool(Material.WHITE_WOOL));
+        assertTrue(BreakPlace.isWool(Material.RED_WOOL));
+        assertFalse(BreakPlace.isWool(Material.WHITE_CARPET));
+    }
+
+    @Test
     void consumesTheTowerFromTheOffHandThatPlacedIt() {
         AtomicReference<ItemStack> mainHand = new AtomicReference<>(new TestItemStack(5));
         AtomicReference<ItemStack> offHand = new AtomicReference<>(new TestItemStack(2));
