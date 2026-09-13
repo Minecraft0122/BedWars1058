@@ -40,6 +40,7 @@ import java.util.List;
 public class ArenaConfig extends ConfigManager {
 
     private static final int CONFIG_VERSION = 22;
+    static final int DEFAULT_VOID_KILL_HEIGHT = -70;
 
     @SuppressWarnings({"SpellCheckingInspection"})
     private List<String> cachedGameOverridables = new ArrayList<>();
@@ -60,7 +61,7 @@ public class ArenaConfig extends ConfigManager {
         yml.addDefault(ConfigPath.ARENA_GENERATOR_PROTECTION, 1);
         yml.addDefault(ConfigPath.ARENA_ISLAND_RADIUS, 17);
         yml.addDefault("worldBorder", 300);
-        yml.addDefault(ConfigPath.ARENA_Y_LEVEL_KILL, -1);
+        yml.addDefault(ConfigPath.ARENA_Y_LEVEL_KILL, DEFAULT_VOID_KILL_HEIGHT);
         //yml.addDefault("disableGeneratorsOnOrphanIslands", false);
         yml.addDefault(ConfigPath.ARENA_CONFIGURATION_MAX_BUILD_Y, 180);
         yml.addDefault(ConfigPath.ARENA_DISABLE_GENERATOR_FOR_EMPTY_TEAMS, false);

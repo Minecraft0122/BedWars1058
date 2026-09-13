@@ -77,7 +77,7 @@ public final class SelfRescuePlatform implements Listener, Runnable {
 
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
     public void onUse(PlayerInteractEvent event) {
-        if (event.getAction() != Action.RIGHT_CLICK_AIR && event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
+        if (!isActivationAction(event.getAction())) return;
         Player player = event.getPlayer();
         IArena arena = activeArena(player);
         if (arena == null || !isItem(event.getItem())) return;
@@ -93,6 +93,11 @@ public final class SelfRescuePlatform implements Listener, Runnable {
         boolean blocksAutomaticDeployment = center.getY() <= automaticTriggerY();
         if (blocksAutomaticDeployment) automaticDeployments.add(player.getUniqueId());
         deploy(arena, player, center, targetY, blocksAutomaticDeployment);
+    }
+
+    static boolean isActivationAction(Action action) {
+        return action == Action.LEFT_CLICK_AIR || action == Action.LEFT_CLICK_BLOCK
+                || action == Action.RIGHT_CLICK_AIR || action == Action.RIGHT_CLICK_BLOCK;
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)

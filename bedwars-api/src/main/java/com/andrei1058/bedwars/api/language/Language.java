@@ -70,7 +70,7 @@ public class Language extends ConfigManager {
         getYml().addDefault(Messages.RECALL_SCROLL_UNAVAILABLE,
                 "&cYou cannot use a recall scroll right now.");
         getYml().addDefault(Messages.RECALL_SCROLL_CANCELLED,
-                "&cRecall cancelled because you are no longer an active player.");
+                "&cRecall cancelled; the scroll was returned.");
         getYml().addDefault(Messages.RECALL_SCROLL_COMPLETED,
                 "&aReturned to your team spawn.");
         getYml().addDefault(Messages.RECALL_SCROLL_FAILED,

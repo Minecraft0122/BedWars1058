@@ -13,6 +13,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 class ArenaConfigTest {
 
     @Test
+    void usesNegativeSeventyAsTheDefaultVoidKillHeight() {
+        assertEquals(-70, ArenaConfig.DEFAULT_VOID_KILL_HEIGHT);
+    }
+
+    @Test
     void forcesLocatorBarOffAcrossLegacyRuleSpellings() {
         List<String> rules = new ArrayList<>(List.of(
                 "doDaylightCycle:false", "locator_bar:true", "LOCATORBAR:true"));

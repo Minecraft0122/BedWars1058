@@ -160,7 +160,7 @@ TAB 相关常用项：
 每张地图一份。主要节点：
 
 - `group`、`display-name`、`minPlayers`、`maxInTeam`。每张竞技场只能属于一个组；该值同时用于匹配、生成器、开局物品、升级菜单和计分板等组专属配置。2.13.x 的 `groups` 列表会保留第一项并自动迁移回单值。
-- `allowSpectate`、`worldBorder`、`y-kill-height`、最大建造高度。
+- `allowSpectate`、`worldBorder`、`y-kill-height`、最大建造高度。新建竞技场的 `y-kill-height` 默认是 `-70`，已有地图保留其已保存的数值。
 - 出生、商店、升级、生成器保护半径。
 - `island-radius`：自动找床、治疗池和陷阱检测范围。
 - `game-rules`：`规则:值` 列表。Paper 1.21.11 使用 `advance_time`、`advance_weather` 和 `spawn_mobs`；旧配置中的 `doDaylightCycle`、`doWeatherCycle`、`doMobSpawning`、`announceAdvancements`、`doInsomnia` 和 `doImmediateRespawn` 会在运行时显式映射到现代注册键，无需手动改写。竞技场初始化时设置正午 `6000 tick`、晴天、关闭昼夜与天气推进，并禁用生物自然生成和随机方块刻。后续 `/time`、睡眠、插件跳时、`/gamerule`、下雨和雷暴均由事件守卫改回固定状态，不进行周期扫描。树叶腐烂、作物生长、草地/蘑菇蔓延、结冰融化等竞技场自然方块变化仍会被阻止。正午与晴天保证普通主世界露天的最高自然天光，不等于洞穴、下界或末地 Fullbright。

@@ -18,9 +18,12 @@ import org.bukkit.Location;
 import org.bukkit.Particle;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.inventory.ItemStack;
@@ -83,6 +86,18 @@ public final class RecallScrollListener implements Listener {
         }
     }
 
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onDamage(EntityDamageEvent event) {
+        if (!(event.getEntity() instanceof Player player)) return;
+        cancelChannel(player, Messages.RECALL_SCROLL_CANCELLED);
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onMove(PlayerMoveEvent event) {
+        if (event.getTo() == null || !hasPositionChanged(event.getFrom(), event.getTo())) return;
+        cancelChannel(event.getPlayer(), Messages.RECALL_SCROLL_CANCELLED);
+    }
+
     private void ensureTicker() {
         if (ticker != null && !ticker.isCancelled()) return;
         ticker = Bukkit.getScheduler().runTaskTimer(BedWars.plugin, this::tick, 20L, 20L);
@@ -130,6 +145,20 @@ public final class RecallScrollListener implements Listener {
                 item -> ShopItemIdentifier.matches(item, ShopItemIdentifier.RECALL_SCROLL));
         if (consumed) player.updateInventory();
         return consumed;
+    }
+
+    static boolean hasPositionChanged(Location from, Location to) {
+        if (from == null || to == null) return true;
+        return !java.util.Objects.equals(from.getWorld(), to.getWorld())
+                || from.getX() != to.getX()
+                || from.getY() != to.getY()
+                || from.getZ() != to.getZ();
+    }
+
+    private void cancelChannel(Player player, String messagePath) {
+        if (channels.remove(player.getUniqueId()) == null) return;
+        if (player.isOnline()) showActionBar(player, messagePath);
+        stopTickerIfIdle();
     }
 
     static boolean consumeRecallScroll(PlayerInventory inventory, Predicate<ItemStack> isRecallScroll) {

@@ -946,7 +946,7 @@ public class SimplifiedChinese extends Language {
         yml.addDefault(Messages.RECALL_SCROLL_COUNTDOWN, "&b回城引导中：&f{time}&b 秒");
         yml.addDefault(Messages.RECALL_SCROLL_ALREADY_CHANNELING, "&c回城卷轴正在引导中，请等待当前传送结束。");
         yml.addDefault(Messages.RECALL_SCROLL_UNAVAILABLE, "&c你现在无法使用回城卷轴。");
-        yml.addDefault(Messages.RECALL_SCROLL_CANCELLED, "&c你已不再是本局存活玩家，回城引导已取消。");
+        yml.addDefault(Messages.RECALL_SCROLL_CANCELLED, "&c回城引导已取消，回城卷轴已退回。");
         yml.addDefault(Messages.RECALL_SCROLL_COMPLETED, "&a已返回队伍出生点。");
         yml.addDefault(Messages.RECALL_SCROLL_FAILED, "&c传送失败，回城引导已结束。");
         yml.addDefault(Messages.SHOP_UTILITY_NPC_SILVERFISH_NAME, "{TeamColor}&l{TeamName} &r{TeamColor}蠹虫");

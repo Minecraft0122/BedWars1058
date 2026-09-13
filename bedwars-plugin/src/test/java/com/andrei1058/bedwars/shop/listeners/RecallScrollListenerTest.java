@@ -1,5 +1,6 @@
 package com.andrei1058.bedwars.shop.listeners;
 
+import org.bukkit.Location;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.junit.jupiter.api.Test;
@@ -95,6 +96,16 @@ class RecallScrollListenerTest {
 
         assertFalse(RecallScrollListener.consumeRecallScroll(
                 inventory(storage, offHand), item -> false));
+    }
+
+    @Test
+    void treatsOnlyPositionChangesAsMovement() {
+        Location from = new Location(null, 1.0, 2.0, 3.0, 0.0F, 0.0F);
+        Location rotated = new Location(null, 1.0, 2.0, 3.0, 90.0F, 30.0F);
+        Location moved = new Location(null, 1.0, 2.1, 3.0);
+
+        assertFalse(RecallScrollListener.hasPositionChanged(from, rotated));
+        assertTrue(RecallScrollListener.hasPositionChanged(from, moved));
     }
 
     private static PlayerInventory inventory(ItemStack[] storage, AtomicReference<ItemStack> offHand) {
