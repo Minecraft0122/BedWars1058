@@ -166,7 +166,7 @@ public final class ChineseConfigDocumentation {
         comment(config, "worldBorder", "世界边界直径配置，单位为方块。");
         comment(config, ConfigPath.ARENA_Y_LEVEL_KILL, "低于此 Y 坐标时判定为掉入虚空。");
         comment(config, ConfigPath.ARENA_CONFIGURATION_MAX_BUILD_Y, "玩家允许放置方块的最大 Y 坐标。");
-        comment(config, ConfigPath.ARENA_DISABLE_GENERATOR_FOR_EMPTY_TEAMS, "空队伍是否停用岛屿资源生成器。");
+        comment(config, ConfigPath.ARENA_DISABLE_GENERATOR_FOR_EMPTY_TEAMS, "历史兼容字段；当前版本即使开启，空队伍的岛屿资源生成器也不会停用。");
         comment(config, ConfigPath.ARENA_DISABLE_NPCS_FOR_EMPTY_TEAMS, "空队伍是否不生成商店和升级 NPC。");
         comment(config, ConfigPath.ARENA_NORMAL_DEATH_DROPS, "是否使用原版死亡掉落；关闭时由插件管理资源掉落。");
         comment(config, ConfigPath.ARENA_USE_BED_HOLO, "是否在床上方显示床状态全息文字。");

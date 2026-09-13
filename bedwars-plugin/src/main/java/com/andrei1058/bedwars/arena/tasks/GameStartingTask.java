@@ -124,16 +124,10 @@ public class GameStartingTask implements Runnable, StartingTask {
             //Color bed block if possible
             //Destroy bed if team is empty
             //Spawn shops and upgrades
-            //Disable generators for empty teams if required
             for (ITeam team : getArena().getTeams()) {
                 nms.colorBed(team);
                 if (team.getMembers().isEmpty()) {
                     team.setBedDestroyed(true);
-                    if (getArena().getConfig().getBoolean(ConfigPath.ARENA_DISABLE_GENERATOR_FOR_EMPTY_TEAMS)) {
-                        for (IGenerator gen : team.getGenerators()) {
-                            gen.disable();
-                        }
-                    }
                 }
             }
 
