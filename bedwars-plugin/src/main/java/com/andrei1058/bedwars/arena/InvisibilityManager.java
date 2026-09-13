@@ -1,5 +1,6 @@
 package com.andrei1058.bedwars.arena;
 
+import com.andrei1058.bedwars.BedWars;
 import com.andrei1058.bedwars.api.arena.IArena;
 import com.andrei1058.bedwars.api.arena.team.ITeam;
 import com.andrei1058.bedwars.api.events.player.PlayerInvisibilityPotionEvent;
@@ -56,8 +57,11 @@ public final class InvisibilityManager {
     public static void synchronizeViewer(IArena arena, Player viewer) {
         if (arena == null || viewer == null) return;
         for (Player respawning : arena.getRespawnSessions().keySet()) {
-            if (!respawning.equals(viewer)) {
-                nms.spigotHidePlayer(respawning, viewer);
+            if (respawning.equals(viewer)) continue;
+            if (shouldHideRespawningEntity(arena, viewer)) {
+                viewer.hideEntity(BedWars.plugin, respawning);
+            } else {
+                viewer.showEntity(BedWars.plugin, respawning);
             }
         }
         for (Player invisible : hiddenEquipmentPlayers(arena)) {
@@ -69,8 +73,11 @@ public final class InvisibilityManager {
     public static void hideRespawningPlayer(IArena arena, Player player) {
         if (arena == null || player == null || nms == null) return;
         for (Player viewer : viewers(arena)) {
-            if (!player.equals(viewer)) {
-                nms.spigotHidePlayer(player, viewer);
+            if (player.equals(viewer)) continue;
+            if (shouldHideRespawningEntity(arena, viewer)) {
+                viewer.hideEntity(BedWars.plugin, player);
+            } else {
+                viewer.showEntity(BedWars.plugin, player);
             }
         }
     }
@@ -104,6 +111,10 @@ public final class InvisibilityManager {
         if (!arena.isPlayer(viewer)) return false;
         ITeam invisibleTeam = arena.getTeam(invisible);
         return invisibleTeam != null && !invisibleTeam.equals(arena.getTeam(viewer));
+    }
+
+    static boolean shouldHideRespawningEntity(IArena arena, Player viewer) {
+        return arena != null && viewer != null && !arena.isSpectator(viewer);
     }
 
     static boolean hasHiddenEquipment(IArena arena, Player player) {

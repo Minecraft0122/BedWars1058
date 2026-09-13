@@ -383,7 +383,7 @@ public class BwTabList {
         }
         boolean spectatorRow = playerListMode == PlayerTab.PlayerListMode.SPECTATOR;
         GameState status = sidebar.getArena().getStatus();
-        ChatColor fallbackColor = spectator || team == null ? null : getPlayerListColor(team);
+        ChatColor fallbackColor = team == null ? null : getPlayerListColor(team);
         prepareTabFallback(player, fallbackColor);
 
         PlayerTab tab = handle.playerTabCreate(

@@ -50,6 +50,8 @@ class BwTabListTest {
 
         assertSame(red, BwTabList.resolvePlayerListTeam(arena, active));
         assertSame(red, BwTabList.resolvePlayerListTeam(arena, eliminated));
+        assertSame(ChatColor.RED,
+                BwTabList.getPlayerListColor(BwTabList.resolvePlayerListTeam(arena, eliminated)));
         assertEquals(null, BwTabList.resolvePlayerListTeam(arena, spectator));
     }
 

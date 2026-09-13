@@ -1,19 +1,26 @@
 package com.andrei1058.bedwars.listeners;
 
+import com.andrei1058.bedwars.BedWars;
 import com.andrei1058.bedwars.api.arena.IArena;
 import com.andrei1058.bedwars.arena.Arena;
 import com.andrei1058.bedwars.arena.SetupSession;
+import com.destroystokyo.paper.event.player.PlayerStartSpectatingEntityEvent;
 import org.bukkit.Location;
+import org.bukkit.NamespacedKey;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Villager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerArmorStandManipulateEvent;
 import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
+import org.bukkit.persistence.PersistentDataType;
 
 /**
  * Stops other teleport plugins from placing an unregistered player directly in
@@ -21,6 +28,8 @@ import org.bukkit.event.player.PlayerTeleportEvent;
  * their plugin teleport, so legitimate BedWars movement remains unaffected.
  */
 public final class ArenaWorldProtection implements Listener {
+
+    private static final String SHOPKEEPER_TAG = "bedwars_shopkeeper";
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onTeleport(PlayerTeleportEvent event) {
@@ -42,7 +51,23 @@ public final class ArenaWorldProtection implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onEntityInteract(PlayerInteractEntityEvent event) {
-        if (isUnregisteredInArena(event.getPlayer())) event.setCancelled(true);
+        Player player = event.getPlayer();
+        IArena arena = Arena.getArenaByPlayer(player);
+        if (arena != null && arena.isSpectator(player) && isShopkeeper(event.getRightClicked())) {
+            event.setCancelled(true);
+            return;
+        }
+        if (isUnregisteredInArena(player)) event.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onStartSpectatingEntity(PlayerStartSpectatingEntityEvent event) {
+        if (isShopkeeper(event.getNewSpectatorTarget())) event.setCancelled(true);
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void onShopkeeperDamage(EntityDamageEvent event) {
+        if (isShopkeeper(event.getEntity())) event.setCancelled(true);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -64,5 +89,11 @@ public final class ArenaWorldProtection implements Listener {
         if (SetupSession.isEditingWorld(player.getUniqueId(), player.getWorld().getName())) return false;
         IArena worldArena = Arena.getArenaByIdentifier(player.getWorld().getName());
         return worldArena != null && Arena.getArenaByPlayer(player) != worldArena;
+    }
+
+    private boolean isShopkeeper(Entity entity) {
+        if (!(entity instanceof Villager villager)) return false;
+        return villager.getPersistentDataContainer().has(
+                new NamespacedKey(BedWars.plugin, SHOPKEEPER_TAG), PersistentDataType.BYTE);
     }
 }

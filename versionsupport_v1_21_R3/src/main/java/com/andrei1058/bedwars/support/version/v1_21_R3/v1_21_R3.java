@@ -226,6 +226,11 @@ public class v1_21_R3 extends VersionSupport {
         if (world == null) return;
 
         Villager villager = (Villager) world.spawnEntity(location, EntityType.VILLAGER);
+        villager.getPersistentDataContainer().set(
+                new NamespacedKey(getPlugin(), "bedwars_shopkeeper"),
+                PersistentDataType.BYTE,
+                (byte) 1
+        );
         villager.setAI(false);
         villager.setAware(false);
         villager.setGravity(false);

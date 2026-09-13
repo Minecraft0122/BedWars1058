@@ -79,6 +79,22 @@ class InvisibilityManagerTest {
         assertEquals(Set.of(potionUser, respawning), InvisibilityManager.hiddenEquipmentPlayers(arena));
     }
 
+    @Test
+    void spectatorsKeepRespawningPlayerEntitiesVisible() {
+        Player respawning = player("respawning");
+        Player spectator = player("spectator");
+        Player opponent = player("opponent");
+        IArena arena = arena(
+                Set.of(respawning, opponent),
+                Set.of(spectator),
+                Map.of(),
+                Set.of(respawning),
+                Set.of());
+
+        assertFalse(InvisibilityManager.shouldHideRespawningEntity(arena, spectator));
+        assertTrue(InvisibilityManager.shouldHideRespawningEntity(arena, opponent));
+    }
+
     private static IArena arena(Set<Player> players, Set<Player> spectators, Map<Player, ITeam> teams,
                                 Set<Player> respawning, Set<Player> potionUsers) {
         ConcurrentHashMap<Player, Integer> respawnSessions = new ConcurrentHashMap<>();
