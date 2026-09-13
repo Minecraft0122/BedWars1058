@@ -356,7 +356,6 @@ public class BedWars extends JavaPlugin {
         /* Register tasks */
         Bukkit.getScheduler().runTaskTimer(this, new Refresh(), 20L, 20L);
         Bukkit.getScheduler().runTaskTimer(this, new EnemyTrackerCompass(), 1L, 2L);
-        Bukkit.getScheduler().runTaskTimer(this, selfRescuePlatform, 1L, 1L);
         //new Refresh().runTaskTimer(this, 20L, 20L);
 
         if (config.getBoolean(ConfigPath.GENERAL_CONFIGURATION_PERFORMANCE_ROTATE_GEN)) {

@@ -44,7 +44,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-public final class SelfRescuePlatform implements Listener, Runnable {
+public final class SelfRescuePlatform implements Listener {
     public static final String ITEM_DATA = "SELF_RESCUE_PLATFORM";
     private static final long LIFETIME_TICKS = 16L * 20L;
     private static final int[][] PATTERN = {
@@ -151,16 +151,6 @@ public final class SelfRescuePlatform implements Listener, Runnable {
         automaticDeployments.remove(uuid);
         manualDeployments.remove(uuid);
         rescueAreas.remove(uuid);
-    }
-
-    @Override
-    public void run() {
-        for (IArena arena : new ArrayList<>(Arena.getArenas())) {
-            if (arena == null || arena.getStatus() != GameState.playing) continue;
-            for (Player player : new ArrayList<>(arena.getPlayers())) {
-                tryAutomaticDeploy(player, player.getLocation());
-            }
-        }
     }
 
     public static boolean isItem(ItemStack item) {

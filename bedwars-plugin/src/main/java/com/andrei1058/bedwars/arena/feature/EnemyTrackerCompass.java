@@ -85,35 +85,37 @@ public final class EnemyTrackerCompass implements Runnable {
 
         List<Player> arenaPlayers = arena.getPlayers();
         if (arenaPlayers == null || arenaPlayers.isEmpty()) return;
-        List<Player> players = new ArrayList<>(arenaPlayers);
+        List<TrackedPlayer> activePlayers = new ArrayList<>(arenaPlayers.size());
+        for (Player player : arenaPlayers) {
+            if (!isActivePlayer(arena, player)) continue;
+            ITeam team = arena.getTeam(player);
+            if (team != null) activePlayers.add(new TrackedPlayer(player, team, player.getLocation()));
+        }
 
-        for (Player player : players) {
-            if (!isActivePlayer(arena, player) || !hasTrackingCompass(player)) continue;
+        for (TrackedPlayer trackedPlayer : activePlayers) {
+            Player player = trackedPlayer.player();
+            if (!hasTrackingCompass(player)) continue;
 
-            ITeam playerTeam = arena.getTeam(player);
-            if (playerTeam == null) continue;
-
-            Player nearestEnemy = findNearestEnemy(arena, players, player, playerTeam);
+            TrackedPlayer nearestEnemy = findNearestEnemy(arena, activePlayers, trackedPlayer);
             if (nearestEnemy == null) {
                 player.setCompassTarget(createIdleTarget(player));
             } else {
-                player.setCompassTarget(nearestEnemy.getLocation());
+                player.setCompassTarget(nearestEnemy.location());
             }
         }
     }
 
-    private Player findNearestEnemy(IArena arena, List<Player> players, Player player, ITeam playerTeam) {
-        Player nearest = null;
+    private TrackedPlayer findNearestEnemy(IArena arena, List<TrackedPlayer> players,
+                                           TrackedPlayer trackedPlayer) {
+        TrackedPlayer nearest = null;
         double nearestDistance = Double.MAX_VALUE;
 
-        for (Player candidate : players) {
-            if (!isActivePlayer(arena, candidate) || candidate.getUniqueId().equals(player.getUniqueId())) continue;
-            if (isInvisible(arena, candidate)) continue;
+        for (TrackedPlayer candidate : players) {
+            if (candidate.player().equals(trackedPlayer.player())) continue;
+            if (isInvisible(arena, candidate.player())) continue;
+            if (candidate.team() == trackedPlayer.team()) continue;
 
-            ITeam candidateTeam = arena.getTeam(candidate);
-            if (candidateTeam == null || candidateTeam == playerTeam) continue;
-
-            double distance = player.getLocation().distanceSquared(candidate.getLocation());
+            double distance = trackedPlayer.location().distanceSquared(candidate.location());
             if (distance < nearestDistance) {
                 nearest = candidate;
                 nearestDistance = distance;
@@ -142,6 +144,9 @@ public final class EnemyTrackerCompass implements Runnable {
             if (isTrackingCompass(item)) return true;
         }
         return false;
+    }
+
+    private record TrackedPlayer(Player player, ITeam team, Location location) {
     }
 
     private Location createIdleTarget(Player player) {
